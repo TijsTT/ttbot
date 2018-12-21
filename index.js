@@ -9,8 +9,10 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Database connection
+// Database models
 const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
+
+// Database connection
 mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { 
 	useNewUrlParser: true,
 }).then(result => console.log("Connected to the database."))
@@ -23,8 +25,7 @@ mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD
 //     res.send(req.body.challenge);
 // });
 
-// Config
-const prefix = "!";
+// TTBOT points emoticon
 const emoticon = ":medal:"
 
 function userMentioned(text) {
@@ -75,22 +76,24 @@ app.post("/", function(req, res) {
 
     let data = req.body;
 
-    console.log(data);
+    console.log(`\n${data}`);
 
     if(data.event.type === "app_mention") {
-        console.log('app was mentioned');
+        // console.log('app was mentioned');
+
+        handleCommands(data);
 
     } else if(data.event.type === "message") {
-        console.log('message was sent');
+        // console.log('message was sent');
 
-        if(emoticonUsed(data.event.text) && userMentioned(data.event.text)) {
-            console.log('point was given');
+        let text = getTextMessage(data);
+
+        if(emoticonUsed(text) && userMentioned(text)) {
+            // console.log('point was given');
  
             handlePoints(data);
      
         }
-
-        handleCommands(data);
 
     }
 
@@ -98,10 +101,67 @@ app.post("/", function(req, res) {
 
 });
 
+function getTextMessage(data) {
+
+    let text = "";
+
+    if(data.event.subtype && data.event.subtype === "message_changed") {
+        text = data.event.message.text;
+    } else {
+        text = data.event.text;
+    }
+
+    return text;
+
+}
+
+function getScoreBoard(data) {
+
+    let date = new Date();
+    let dateString = `${date.getMonth()}/${date.getFullYear()}`;
+
+    EmployeeOfTheMonth.findOne({ month: dateString })
+    .then(async result => {
+
+        if(result === null) { return chatPostMessage("This month there are no points given yet.", data.event.channel)}
+
+        let output = "";
+        let usersList = await getSlackUsersList();
+
+        // Sorting employees by score
+        result.employees.sort(function(a, b) { return b.points - a.points });
+
+        for(let i = 0; i < result.employees.length; i++) {
+
+            let username = "";
+            for(let j = 0; j < usersList.length; j++) {
+                if(result.employees[i].userID === usersList[j].userID) {
+                    username = usersList[j].username;
+                    break;
+                }
+            }
+
+            output += `- ${username}: ${result.employees[i].points}\n`;
+
+        }
+
+        return chatPostMessage(output, data.event.channel);
+
+    })
+    .catch(err => {
+        console.log(err);
+        return chatPostMessage("Something went wrong searching the database", data.event.channel);
+    })
+
+}
+
 function handlePoints(data) {
 
-    let mentionedUserId = getMentionedUserId(data.event.text);
-    let amountOfPoints = getAmountOfPoints(data.event.text);
+    let mentionedUserId = getMentionedUserId(getTextMessage(data));
+
+    if(mentionedUserId === data.event.user) return chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+
+    let amountOfPoints = getAmountOfPoints(getTextMessage(data));
     let date = new Date();
     let dateString = `${date.getMonth()}/${date.getFullYear()}`;
 
@@ -111,18 +171,18 @@ function handlePoints(data) {
         let month;
 
         if(result === null) {
-            console.log("Initializing new month...");
+            // console.log("Initializing new month...");
 
             month = await initNewMonth(dateString);
 
         } else {
-            console.log("Already an object for this month.");
+            // console.log("Already an object for this month.");
 
             month = result;
 
         }
 
-        let updatedMonth = await addPointsToUser(month, mentionedUserId, amountOfPoints);
+        await addPointsToUser(month, mentionedUserId, amountOfPoints);
 
     })
     .catch(err => {
@@ -141,19 +201,19 @@ async function addPointsToUser(month, userID, amountOfPoints) {
     
                 month.employees[i].points += amountOfPoints;
     
-                month.save()
-                .then(result => {
-                    console.log('points added');
-                    resolve();
-                })
-                .catch(err => {
-                    console.log(err);
-                    reject();
-                })
-    
             }
     
         }
+        
+        month.save()
+        .then(result => {
+            // console.log('points added');
+            return resolve();
+        })
+        .catch(err => {
+            console.log(err);
+            return reject();
+        })
 
     })
 
@@ -185,7 +245,10 @@ async function getSlackUsersList() {
             for(let i = 0; i < body.members.length; i++) {
 
                 if(body.members[i].id !== "USLACKBOT" && !body.members[i].is_bot) {
-                    usersList.push(body.members[i].id);
+                    usersList.push({
+                        userID: body.members[i].id,
+                        username: body.members[i].name
+                    });
                 }
                     
             }
@@ -210,7 +273,7 @@ async function initNewMonth(date) {
 
             employees.push({
                 _id: mongoose.Types.ObjectId(),
-                userID: usersList[i],
+                userID: usersList[i].userID,
                 points: 0
             })
 
@@ -224,7 +287,6 @@ async function initNewMonth(date) {
     
         month.save()
         .then(result => {
-            console.log(result);
             resolve(result);
         })
         .catch(err => {
@@ -261,15 +323,13 @@ function handleCommands(data) {
 
     let message = data.event.text;
 
-    if(message[0] !== prefix) return;
-
-    let args = message.substr(1).split(" ");
-	let command = args[0].toLowerCase();
+    let args = message.split(" ");
+	let command = args[1].toLowerCase();
 
     switch(command) {
 
-        case "ping":
-            chatPostMessage("Pong!", data.event.channel);
+        case "score":
+            getScoreBoard(data);
             break;
 
         default:
