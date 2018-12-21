@@ -18,13 +18,6 @@ mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD
 }).then(result => console.log("Connected to the database."))
 .catch(err => console.log("Something went wrong when connecting to the database."));
 
-// FOR EVENT AUTHORIZATION (DOCS: https://api.slack.com/bot-users)
-// app.post('/', function(req, res) {
-//     console.log(req.body.challenge);
-//     res.type('text/plain'); 
-//     res.send(req.body.challenge);
-// });
-
 // TTBOT points emoticon
 const emoticon = ":medal:"
 
@@ -75,6 +68,14 @@ function getMentionedUserId(text) {
 app.post("/", function(req, res) {
 
     let data = req.body;
+
+    if(data.challenge) {
+
+        // FOR EVENT AUTHORIZATION (DOCS: https://api.slack.com/bot-users)
+        res.type('text/plain'); 
+        res.send(data.challenge);
+
+    }
 
     console.log(`\n${data}`);
 
