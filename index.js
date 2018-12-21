@@ -69,7 +69,6 @@ app.post("/", function(req, res) {
 
     let data = req.body;
 
-    res.json({ ok: true });
     res.sendStatus(200);
 
     if(data.challenge) {
