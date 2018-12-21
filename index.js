@@ -69,8 +69,6 @@ app.post("/", function(req, res) {
 
     let data = req.body;
 
-    res.sendStatus(200);
-
     if(data.challenge) {
 
         // FOR EVENT AUTHORIZATION (DOCS: https://api.slack.com/bot-users)
@@ -100,6 +98,8 @@ app.post("/", function(req, res) {
         }
 
     }
+
+    res.send("OK");
 
 });
 
