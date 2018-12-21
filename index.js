@@ -74,6 +74,7 @@ app.post("/", function(req, res) {
         // FOR EVENT AUTHORIZATION (DOCS: https://api.slack.com/bot-users)
         res.type('text/plain'); 
         res.send(data.challenge);
+        return;
 
     }
 
