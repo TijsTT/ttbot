@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const request = require('request');
 const mongoose = require('mongoose');
+var schedule = require('node-schedule');
 var app = express();
 
 // Bodyparser middleware
@@ -19,7 +20,8 @@ mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD
 .catch(err => console.log("Something went wrong when connecting to the database."));
 
 // TTBOT points emoticon
-const emoticon = ":medal:"
+const emoticon = ":medal:";
+const botChannel = "CET9VNEDN";
 
 function userMentioned(text) {
 
@@ -76,14 +78,16 @@ app.post("/", function(req, res) {
         res.send(data.challenge);
         return;
 
+    } else {
+        res.sendStatus(200);
     }
 
-    console.log(`\n${data}`);
+    console.log('\n', data);
 
     if(data.event.type === "app_mention") {
         // console.log('app was mentioned');
 
-        handleCommands(data);
+        return handleCommands(data);
 
     } else if(data.event.type === "message") {
         // console.log('message was sent');
@@ -92,14 +96,13 @@ app.post("/", function(req, res) {
 
         if(emoticonUsed(text) && userMentioned(text)) {
             // console.log('point was given');
- 
-            handlePoints(data);
+
+            return handlePoints(data);
      
         }
 
     }
 
-    res.send("OK");
 
 });
 
@@ -117,7 +120,7 @@ function getTextMessage(data) {
 
 }
 
-function getScoreBoard(data) {
+function getScoreBoard(channel) {
 
     let date = new Date();
     let dateString = `${date.getMonth()}/${date.getFullYear()}`;
@@ -125,13 +128,15 @@ function getScoreBoard(data) {
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(async result => {
 
-        if(result === null) { return chatPostMessage("This month there are no points given yet.", data.event.channel)}
+        if(result === null) { return chatPostMessage("This month there are no points given yet.", channel)}
 
         let output = "";
         let usersList = await getSlackUsersList();
 
         // Sorting employees by score
         result.employees.sort(function(a, b) { return b.points - a.points });
+
+        let icons = [":first_place_medal:", ":second_place_medal:", ":third_place_medal:", ":sports_medal:"];
 
         for(let i = 0; i < result.employees.length; i++) {
 
@@ -143,11 +148,19 @@ function getScoreBoard(data) {
                 }
             }
 
-            output += `- ${username}: ${result.employees[i].points}\n`;
+            let icon;
+            i < 3 ? icon = icons[i] : icon = icons[3];
+
+            output += `${icon} ${username}: ${result.employees[i].points}\n`;
 
         }
 
-        return chatPostMessage(output, data.event.channel);
+        let attachments = [{
+            "text": output,
+            "color": "#58b4e5"
+        }]
+
+        return chatPostMessage("Behold the scoreboard", channel, attachments);
 
     })
     .catch(err => {
@@ -174,14 +187,16 @@ function handlePoints(data) {
 
         if(result === null) {
             // console.log("Initializing new month...");
-
             month = await initNewMonth(dateString);
+            
+            schedule.scheduleJob({ hour: 09, minute: 00, dayOfWeek: 1, dayOfMonth: [1,2,3,4,5,6,7] }, function(){
+                let monthToAnnounce = dateString;
+                announceWinners(monthToAnnounce);
+            });
 
         } else {
             // console.log("Already an object for this month.");
-
             month = result;
-
         }
 
         await addPointsToUser(month, mentionedUserId, amountOfPoints);
@@ -193,6 +208,19 @@ function handlePoints(data) {
 
 }
 
+function announceWinners(date) {
+
+    EmployeeOfTheMonth.findOne({ month: date })
+    .then(result => {
+        getScoreBoard(botChannel);
+        chatPostMessage("Congratulations to the winners! Good luck next month!", botChannel)
+    })
+    .catch(err => {
+        console.log("Something went wrong announcing the winners?",err);
+    })
+
+}
+
 async function addPointsToUser(month, userID, amountOfPoints) {
 
     return new Promise((resolve, reject) => {
@@ -200,16 +228,13 @@ async function addPointsToUser(month, userID, amountOfPoints) {
         for(let i = 0; i < month.employees.length; i++) {
 
             if(month.employees[i].userID === userID) {
-    
                 month.employees[i].points += amountOfPoints;
-    
             }
     
         }
         
         month.save()
         .then(result => {
-            // console.log('points added');
             return resolve();
         })
         .catch(err => {
@@ -300,7 +325,21 @@ async function initNewMonth(date) {
 
 }
 
-function chatPostMessage(message, channel){
+function chatPostMessage(message, channel, attachments=undefined){
+
+    let body;
+    if(attachments) {
+        body = {
+            "text": message,
+            "channel": channel,
+            "attachments": attachments
+        }
+    } else {
+        body = {
+            "text": message,
+            "channel": channel
+        }
+    }
 
     let clientServerOptions = {
         uri: 'https://slack.com/api/chat.postMessage',
@@ -309,10 +348,7 @@ function chatPostMessage(message, channel){
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
         },
-        body: JSON.stringify({
-            "text": message,
-            "channel": channel,
-        })
+        body: JSON.stringify(body)
     }
 
     request(clientServerOptions, (err) => {
@@ -331,7 +367,7 @@ function handleCommands(data) {
     switch(command) {
 
         case "score":
-            getScoreBoard(data);
+            getScoreBoard(data.event.channel);
             break;
 
         default:
