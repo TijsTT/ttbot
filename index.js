@@ -113,15 +113,14 @@ function postCommands(channel) {
         { command: "score", description: "Returns the score for the employee of the month." },
         { command: "joke", description: "You like dad jokes? This one is for you." }
     ];
-    
+
     let output = "";
 
     for(let i = 0; i < commands.length; i++) {
-        output += `- @TTBOT ${commands[i].command} : ${commands[i].description}\n`
+        output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settings.emoticon}
-        Just mention the person (@person) and add as many ${settings.emoticon} emojis to the message as you want to give them that many points!`
+    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settings.emoticon}\nJust mention the person (@person) and add as many ${settings.emoticon} emojis to the message as you want to give them that many points!`
 
     return slackHandlers.chatPostMessage(output, channel);
 
