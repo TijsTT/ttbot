@@ -4,6 +4,7 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 const helpers = require('./helpers');
+const slackHandlers = require('./slackHandlers');
 
 var app = express();
 
@@ -59,7 +60,7 @@ app.post("/", function(req, res) {
 
 });
 
-function handleCommands(data) {
+async function handleCommands(data) {
 
     let message = data.event.text;
 
@@ -72,10 +73,32 @@ function handleCommands(data) {
             employeeOfTheMonthHandlers.getScoreBoard(data.event.channel);
             break;
 
+        case "joke":
+            postRandomJoke(data.event.channel);
+            break;
+
         default:
             break;
 
     }
+
+}
+
+function postRandomJoke(channel) {
+
+    let clientServerOptions = {
+        uri: 'https://icanhazdadjoke.com/slack',
+        method: 'GET'
+    }
+
+    request(clientServerOptions, (err, result) => {
+
+        if(err) return "Something went wrong getting a joke.";
+
+        let joke = JSON.parse(result.body);
+        return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
+
+    }); 
 
 }
 

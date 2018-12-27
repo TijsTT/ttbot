@@ -1,5 +1,5 @@
 const settings = {
-    emoticon: ":medal:",
+    emoticon: ":octopus:",
     botChannel: "CET9VNEDN"
 }
 
