@@ -3,6 +3,7 @@ const express = require('express');
 const request = require('request');
 const mongoose = require('mongoose');
 
+const settings = require('./settings');
 const helpers = require('./helpers');
 const slackHandlers = require('./slackHandlers');
 
@@ -69,6 +70,10 @@ async function handleCommands(data) {
 
     switch(command) {
 
+        case "help":
+            postCommands(data.event.channel);
+            break;
+
         case "score":
             employeeOfTheMonthHandlers.getScoreBoard(data.event.channel);
             break;
@@ -99,6 +104,24 @@ function postRandomJoke(channel) {
         return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
 
     }); 
+
+}
+
+function postCommands(channel) {
+
+    let commands = [
+        { command: "score", description: "Returns the score for the employee of the month." },
+        { command: "joke", description: "You like dad jokes? This one is for you." }
+    ], output;
+
+    for(let i = 0; i < commands.length; i++) {
+        output += `- @TTBOT ${commands[i].command} : ${commands[i].description}\n`
+    }
+
+    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settings.emoticon}
+        \nJust mention the person (@person) and add as many ${settings.emoticon} emojis to the message as you want to give them that many points!`
+
+    return slackHandlers.chatPostMessage(output, channel);
 
 }
 
