@@ -1,13 +1,17 @@
+// Here every function that's connected to the EmployeeOfTheMonth collection is located.
+
 const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
 
-const helpers = require('./helpers.js');
-const settings = require('./settings.js');
+const helpers = require('./helpers');
+const settings = require('./settings');
+const slackHandlers = require('./slackHandlers');
 
+// Initializes the process of adding points to an employee
 module.exports.init = function(data) {
 
     let mentionedUserId = helpers.getMentionedUserId(helpers.getTextMessage(data));
 
-    if(mentionedUserId === data.event.user) return helpers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+    if(mentionedUserId === data.event.user) return slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
 
     let amountOfPoints = helpers.getAmountOfPoints(helpers.getTextMessage(data));
     let date = new Date();
@@ -19,15 +23,9 @@ module.exports.init = function(data) {
         let month;
 
         if(result === null) {
-            // console.log("Initializing new month...");
             month = await initNewMonth(dateString);
-            
-            // let monthToAnnounce = dateString;
-            // announceWinners(monthToAnnounce);
-
 
         } else {
-            // console.log("Already an object for this month.");
             month = result;
         }
 
@@ -40,6 +38,7 @@ module.exports.init = function(data) {
 
 }
 
+// Returns the scoreboard at this time
 module.exports.getScoreBoard = function(channel) {
 
     let date = new Date();
@@ -48,10 +47,10 @@ module.exports.getScoreBoard = function(channel) {
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(async result => {
 
-        if(result === null) { return helpers.chatPostMessage("This month there are no points given yet.", channel)}
+        if(result === null) { return slackHandlers.chatPostMessage("This month there are no points given yet.", channel)}
 
         let output = "";
-        let usersList = await helpers.getSlackUsersList();
+        let usersList = await slackHandlers.getSlackUsersList();
 
         // Sorting employees by score
         result.employees.sort(function(a, b) { return b.points - a.points });
@@ -80,29 +79,17 @@ module.exports.getScoreBoard = function(channel) {
             "color": "#58b4e5"
         }]
 
-        return helpers.chatPostMessage("Behold the scoreboard", channel, attachments);
+        return slackHandlers.chatPostMessage("Behold the scoreboard", channel, attachments);
 
     })
     .catch(err => {
         console.log(err);
-        return helpers.chatPostMessage("Something went wrong searching the database", data.event.channel);
+        return slackHandlers.chatPostMessage("Something went wrong searching the database", data.event.channel);
     })
 
 }
 
-function announceWinners(date) {
-
-    EmployeeOfTheMonth.findOne({ month: date })
-    .then(result => {
-        getScoreBoard(settings.botChannel);
-        helpers.chatPostMessage("Congratulations to the winners! Good luck next month!", settings.botChannel)
-    })
-    .catch(err => {
-        console.log("Something went wrong announcing the winners?",err);
-    })
-
-}
-
+// Adds a given amount of points to a given user for a given month
 async function addPointsToUser(month, userID, amountOfPoints) {
 
     return new Promise((resolve, reject) => {
@@ -128,11 +115,12 @@ async function addPointsToUser(month, userID, amountOfPoints) {
 
 }
 
+// Creates a new month employeeOfTheMonth object
 async function initNewMonth(date) {
 
     return new Promise(async (resolve, reject) => {
 
-        let usersList = await helpers.getSlackUsersList();
+        let usersList = await slackHandlers.getSlackUsersList();
 
         let employees = [];
 
@@ -164,3 +152,35 @@ async function initNewMonth(date) {
     })
 
 }
+
+// Handles announcing the winners when the month is over
+function announceWinners() {
+
+    if(helpers.isFirstMondayOfTheMonth()) {
+        if(!helpers.isTimeToStop()) return;
+    } else {
+        return;
+    }
+
+    let date = new Date();
+    let dateMonth, dateYear;
+    date.getMonth() == 0 ? dateMonth = 11 : dateMonth = date.getMonth() - 1;
+    date.getMonth() == 0 ? dateYear = date.getFullYear() - 1 : dateYear = date.getFullYear();
+    let dateString = `${dateMonth}/${dateYear}`;
+
+    EmployeeOfTheMonth.findOne({ month: dateString })
+    .then(result => {
+        getScoreBoard(settings.botChannel);
+        slackHandlers.chatPostMessage("Congratulations to the winners! Good luck next month!", settings.botChannel)
+    })
+    .catch(err => {
+        console.log("Something went wrong announcing the winners?",err);
+    })
+
+}
+
+// This interval will check every hour if the winners can be announced
+announceWinners();
+setInterval(() => {
+    announceWinners();
+}, 3600000);

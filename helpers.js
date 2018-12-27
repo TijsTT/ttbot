@@ -1,6 +1,8 @@
-const settings = require('./settings');
-const request = require('request');
+// This is the place for all helper functions. Mostly functions with a return value, used in other functions.
 
+const settings = require('./settings');
+
+// Returns if a user is mentioned in the given text
 module.exports.userMentioned = function(text) {
 
     if(text.includes("<@")) return true;
@@ -8,6 +10,7 @@ module.exports.userMentioned = function(text) {
     
 }
 
+// Returns if the given text contains the set emoticon
 module.exports.emoticonUsed = function(text) {
 
     if(text.includes(settings.emoticon)) return true;
@@ -15,6 +18,7 @@ module.exports.emoticonUsed = function(text) {
 
 }
 
+// Returns the amount of set emoticons in the given text
 module.exports.getAmountOfPoints = function(text) {
 
     let regex = new RegExp(settings.emoticon, "g");
@@ -24,6 +28,7 @@ module.exports.getAmountOfPoints = function(text) {
 
 }
 
+// Returns the id of the mentioned user
 module.exports.getMentionedUserId = function(text) {
 
     let strippingID = false;
@@ -45,6 +50,7 @@ module.exports.getMentionedUserId = function(text) {
 
 }
 
+// Returns the text message from a Slack data object
 module.exports.getTextMessage = function(data) {
 
     let text = "";
@@ -59,76 +65,24 @@ module.exports.getTextMessage = function(data) {
 
 }
 
-module.exports.chatPostMessage = function(message, channel, attachments=undefined){
+// Returns if today is first monday of the month
+module.exports.isFirstMondayOfTheMonth = function() {
 
-    let body;
-    if(attachments) {
-        body = {
-            "text": message,
-            "channel": channel,
-            "attachments": attachments
-        }
-    } else {
-        body = {
-            "text": message,
-            "channel": channel
-        }
-    }
+    let date = new Date();
 
-    let clientServerOptions = {
-        uri: 'https://slack.com/api/chat.postMessage',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
-        },
-        body: JSON.stringify(body)
-    }
+    if(date.getUTCDate() < 8 && date.getUTCDay() == 0) return true;
 
-    request(clientServerOptions, (err) => {
-        if(err) console.log("Something went wrong posting the message.\n", err);
-    });
+    return false;
 
 }
 
-module.exports.getSlackUsersList = async function() {
+// Returns if it's time to stop... and show last months results
+module.exports.isTimeToStop = function() {
 
-    return new Promise((resolve, reject) => {
+    let date = new Date();
 
-        let clientServerOptions = {
-            uri: 'https://slack.com/api/users.list',
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
-            }
-        }
-    
-        request(clientServerOptions, (err, result) => {
+    if(date.getUTCHours() == 8) return true;
 
-            if(err) {
-                console.log("Something went wrong while getting the users list.\n", err);
-                return reject("no list");      
-            }
-
-            let body = JSON.parse(result.body);
-            let usersList = [];
-
-            for(let i = 0; i < body.members.length; i++) {
-
-                if(body.members[i].id !== "USLACKBOT" && !body.members[i].is_bot) {
-                    usersList.push({
-                        userID: body.members[i].id,
-                        username: body.members[i].name
-                    });
-                }
-                    
-            }
-
-            return resolve(usersList);
-
-        });
-
-    })
+    return false;
 
 }

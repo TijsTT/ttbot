@@ -4,7 +4,6 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 const helpers = require('./helpers');
-const settings = require('./settings');
 
 var app = express();
 
