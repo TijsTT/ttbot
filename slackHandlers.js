@@ -53,7 +53,7 @@ module.exports.getSlackUsersList = async function() {
 
             if(err) {
                 console.log("Something went wrong while getting the users list.\n", err);
-                return reject("no list");      
+                return reject("no user list");      
             }
 
             let body = JSON.parse(result.body);
@@ -76,4 +76,42 @@ module.exports.getSlackUsersList = async function() {
 
     })
 
+}
+
+module.exports.getSlackUsernameById = async function(userID) {
+    
+    return new Promise((resolve, reject) => {
+
+        let clientServerOptions = {
+            uri: 'https://slack.com/api/users.list',
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+            }
+        }
+    
+        request(clientServerOptions, (err, result) => {
+
+            if(err) {
+                console.log("Something went wrong while getting the users list.\n", err);
+                return reject("no user list");      
+            }
+
+            let body = JSON.parse(result.body);
+
+            for(let i = 0; i < body.members.length; i++) {
+
+                if(body.members[i].id == userID) {
+                    return resolve(body.members[i].name);
+                }
+                    
+            }
+
+            return reject("no user with this id in user list"); 
+
+        });
+
+    })
+    
 }

@@ -30,7 +30,9 @@ module.exports.init = function(data) {
             month = result;
         }
 
-        await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
+        let output = await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
+
+        slackHandlers.chatPostMessage(output, botChannel);
 
     })
     .catch(err => {
@@ -93,7 +95,7 @@ module.exports.getScoreBoard = function(channel) {
 // Adds a given amount of points to a given user for a given month
 async function addPointsToUser(month, userID, amountOfPoints, data) {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
 
         let newUser = true;
         
@@ -113,14 +115,17 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
                 points: amountOfPoints
             })
         }
+
+        let usernameGiver = await slackHandlers.getSlackUsernameById(data.event.user);
+        let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
         
         month.save()
         .then(result => {
-            return resolve();
+            return resolve(`${usernameGiver} just awarded ${amountOfPoints} to ${usernameReceiver}!`);
         })
         .catch(err => {
             console.log(err);
-            return reject();
+            return reject(`Something went wrong while adding the points you awarded ${usernameGiver}. Devs should look into this.`);
         })
 
     })
@@ -183,10 +188,10 @@ function announceWinners() {
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(result => {
         getScoreBoard(settings.botChannel);
-        slackHandlers.chatPostMessage("Congratulations to the winners! Good luck next month!", settings.botChannel)
+        slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", settings.botChannel)
     })
     .catch(err => {
-        console.log("Something went wrong announcing the winners?",err);
+        console.log("Something went wrong announcing the winners?", err);
     })
 
 }

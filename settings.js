@@ -1,6 +1,6 @@
 const settings = {
     emoticon: ":octopus:",
-    botChannel: "CET9VNEDN",
+    botChannel: "CF4BM1QBY",
     botId: "UETSX824U"
 }
 
