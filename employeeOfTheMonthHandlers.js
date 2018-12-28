@@ -29,7 +29,7 @@ module.exports.init = function(data) {
             month = result;
         }
 
-        await addPointsToUser(month, mentionedUserId, amountOfPoints);
+        await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
 
     })
     .catch(err => {
@@ -90,16 +90,27 @@ module.exports.getScoreBoard = function(channel) {
 }
 
 // Adds a given amount of points to a given user for a given month
-async function addPointsToUser(month, userID, amountOfPoints) {
+async function addPointsToUser(month, userID, amountOfPoints, data) {
 
     return new Promise((resolve, reject) => {
 
+        let newUser = true;
+        
         for(let i = 0; i < month.employees.length; i++) {
 
             if(month.employees[i].userID === userID) {
                 month.employees[i].points += amountOfPoints;
+                newUser = false;
             }
     
+        }
+
+        if(newUser && userID !== "USLACKBOT" && userID !== settings.botId) {
+            month.employees.push({
+                _id: mongoose.Types.ObjectId(),
+                userID: userID,
+                points: amountOfPoints
+            })
         }
         
         month.save()
