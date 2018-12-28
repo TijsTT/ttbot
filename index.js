@@ -126,6 +126,14 @@ function postCommands(channel) {
 
 }
 
+// Interval loop to prevent server from going into sleep mode
+setInterval(() => {
+    console.log('Pinging server so it doesn\'t go to sleep...');
+    request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
+        if(err) console.log('Something went wrong while pinging the ttbot.', err);
+    })
+}, 300000);
+
 var server = app.listen(process.env.PORT, function() {
     var port = server.address().port;
     console.log('Server started on port', port, '...');
