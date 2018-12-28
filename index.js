@@ -134,6 +134,10 @@ setInterval(() => {
     })
 }, 300000);
 
+app.get('/', function(req, res) {
+    res.sendStatus(200);
+})
+
 var server = app.listen(process.env.PORT, function() {
     var port = server.address().port;
     console.log('Server started on port', port, '...');
