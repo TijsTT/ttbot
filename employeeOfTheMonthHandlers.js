@@ -121,7 +121,7 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
         
         month.save()
         .then(result => {
-            return resolve(`${usernameGiver} just awarded ${amountOfPoints} to ${usernameReceiver}!`);
+            return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
         })
         .catch(err => {
             console.log(err);
