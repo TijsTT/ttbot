@@ -1,5 +1,6 @@
 // Here every function that's connected to the EmployeeOfTheMonth collection is located.
 
+const mongoose = require('mongoose');
 const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
 
 const helpers = require('./helpers');
