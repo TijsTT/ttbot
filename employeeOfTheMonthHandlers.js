@@ -32,7 +32,7 @@ module.exports.init = function(data) {
 
         let output = await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
 
-        slackHandlers.chatPostMessage(output, botChannel);
+        slackHandlers.chatPostMessage(output, settings.botChannel);
 
     })
     .catch(err => {
