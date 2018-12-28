@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const settings = require('./settings');
 const helpers = require('./helpers');
 const slackHandlers = require('./slackHandlers');
+const dailyStandupHandler = require('./dailyStandupHandler');
 
 var app = express();
 
@@ -82,6 +83,11 @@ async function handleCommands(data) {
             postRandomJoke(data.event.channel);
             break;
 
+        case "dailystandupuser":
+            let dailyStandupUserID = await helpers.getMentionedUserId(args[2]);
+            dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
+            break;
+
         default:
             break;
 
@@ -134,6 +140,19 @@ setInterval(() => {
     })
 }, 300000);
 
+// This interval will check every hour if the winners can be announced
+employeeOfTheMonthHandlers.announceWinners();
+setInterval(() => {
+    employeeOfTheMonthHandlers.announceWinners();
+}, 3600000);
+
+// This interval will check every hour if the daily standup should be initiated
+dailyStandupHandler.possiblyInit();
+setInterval(() => {
+    dailyStandupHandler.possiblyInit();
+}, 3600000);
+
+// Make sure that the ping request doesn't return a 404 status
 app.get('/', function(req, res) {
     res.sendStatus(200);
 })

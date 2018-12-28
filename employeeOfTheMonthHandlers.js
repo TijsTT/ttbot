@@ -171,7 +171,7 @@ async function initNewMonth(date) {
 }
 
 // Handles announcing the winners when the month is over
-function announceWinners() {
+module.exports.announceWinners = function() {
 
     if(helpers.isFirstMondayOfTheMonth()) {
         if(!helpers.isTimeToStop()) return;
@@ -195,9 +195,3 @@ function announceWinners() {
     })
 
 }
-
-// This interval will check every hour if the winners can be announced
-announceWinners();
-setInterval(() => {
-    announceWinners();
-}, 3600000);

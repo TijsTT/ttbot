@@ -86,3 +86,14 @@ module.exports.isTimeToStop = function() {
     return false;
 
 }
+
+// Returns if it's a workday today
+module.exports.isWorkDay = function() {
+
+    let date = new Date();
+
+    if(date.getUTCDay() < 5) return true;
+
+    return false;
+
+}
