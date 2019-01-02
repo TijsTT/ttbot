@@ -142,16 +142,14 @@ cron.schedule('*/5 * * * *', () => {
 });
 
 // This interval will check every hour if the winners can be announced
-employeeOfTheMonthHandlers.announceWinners();
-setInterval(() => {
+cron.schedule('0 0 * * *', () => {
     employeeOfTheMonthHandlers.announceWinners();
-}, 3600000);
+});
 
 // This interval will check every hour if the daily standup should be initiated
-dailyStandupHandler.possiblyInit();
-setInterval(() => {
+cron.schedule('0 0 * * *', () => {
     dailyStandupHandler.possiblyInit();
-}, 3600000);
+})
 
 // Make sure that the ping request doesn't return a 404 status
 app.get('/', function(req, res) {
