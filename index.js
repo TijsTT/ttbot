@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const request = require('request');
 const mongoose = require('mongoose');
+const cron = require('node-cron');
 
 const settings = require('./settings');
 const helpers = require('./helpers');
@@ -133,12 +134,12 @@ function postCommands(channel) {
 }
 
 // Interval loop to prevent server from going into sleep mode
-setInterval(() => {
+cron.schedule('*/5 * * * *', () => {
     console.log('Pinging server so it doesn\'t go to sleep...');
     request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
         if(err) console.log('Something went wrong while pinging the ttbot.', err);
     })
-}, 300000);
+});
 
 // This interval will check every hour if the winners can be announced
 employeeOfTheMonthHandlers.announceWinners();
