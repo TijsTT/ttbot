@@ -65,7 +65,7 @@ app.post("/", function(req, res) {
 
 async function handleCommands(data) {
 
-    let message = data.event.text;
+    let message = helpers.getTextMessage(data);
 
     let args = message.split(" ");
 	let command = args[1].toLowerCase();
