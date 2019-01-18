@@ -172,11 +172,11 @@ async function initNewMonth(date) {
 // Handles announcing the winners when the month is over
 module.exports.announceWinners = function() {
 
-    if(helpers.isFirstMondayOfTheMonth()) {
-        if(!helpers.isTimeToStop()) return;
-    } else {
-        return;
-    }
+    // if(helpers.isFirstMondayOfTheMonth()) {
+    //     if(!helpers.isTimeToStop()) return;
+    // } else {
+    //     return;
+    // }
 
     let date = new Date();
     let dateMonth, dateYear;
