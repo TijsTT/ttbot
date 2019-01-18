@@ -75,7 +75,7 @@ async function handleCommands(data) {
     switch(command) {
 
         case "help":
-            postCommands(data.event.channel);
+            postCommands(data.event.channel, data.event.user);
             break;
 
         case "score":
@@ -120,7 +120,7 @@ function postRandomJoke(channel) {
 
 }
 
-async function postCommands(channel) {
+async function postCommands(channel, userID) {
 
     let commands = [
         { command: "score", description: "Returns the score for the employee of the month." },
@@ -133,7 +133,7 @@ async function postCommands(channel) {
         output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    let emoticon = await settingsUsersHandler.getSettingsUserEmoticon();
+    let emoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
 
     output += `\nTo thank employees for being awesome, you can award them by giving them a ${emoticon}\nJust mention the person (@person) and add as many ${emoticon} emojis to the message as you want to give them that many points!`
 
