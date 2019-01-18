@@ -39,9 +39,9 @@ app.post("/", async function(req, res) {
         res.sendStatus(200);
     }
 
-    console.log('\n', data);
-
     if(data.event.subtype && data.event.subtype === 'bot_message') return;
+
+    console.log('\n', data);
 
     if(data.event.type === "app_mention") {
         // console.log('app was mentioned');
