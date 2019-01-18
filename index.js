@@ -120,7 +120,7 @@ function postRandomJoke(channel) {
 
 }
 
-function postCommands(channel) {
+async function postCommands(channel) {
 
     let commands = [
         { command: "score", description: "Returns the score for the employee of the month." },
@@ -133,7 +133,9 @@ function postCommands(channel) {
         output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settingsUsersHandler.getSettingsUserEmoticon()}\nJust mention the person (@person) and add as many ${settingsUsersHandler.getSettingsUserEmoticon()} emojis to the message as you want to give them that many points!`
+    let emoticon = await settingsUsersHandler.getSettingsUserEmoticon();
+
+    output += `\nTo thank employees for being awesome, you can award them by giving them a ${emoticon}\nJust mention the person (@person) and add as many ${emoticon} emojis to the message as you want to give them that many points!`
 
     return slackHandlers.chatPostMessage(output, channel);
 
