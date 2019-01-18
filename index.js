@@ -153,7 +153,7 @@ cron.schedule('*/5 * * * *', () => {
 });
 
 // This interval will check every hour if the winners can be announced
-cron.schedule('40 15 18 1 5', () => {
+cron.schedule('45 15 18 1 5', () => {
     employeeOfTheMonthHandlers.announceWinners();
 });
 

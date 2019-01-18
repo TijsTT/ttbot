@@ -186,7 +186,7 @@ module.exports.announceWinners = function() {
 
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(result => {
-        getScoreBoard(process.env.BOT_CHANNEL);
+        module.exports.getScoreBoard(process.env.BOT_CHANNEL);
         slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL)
     })
     .catch(err => {
