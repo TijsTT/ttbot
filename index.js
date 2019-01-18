@@ -153,8 +153,13 @@ cron.schedule('*/5 * * * *', () => {
 });
 
 // This interval will check every hour if the winners can be announced
-cron.schedule('* 32 16 18 1', () => {
+cron.schedule('36 16 18 1 5', () => {
     employeeOfTheMonthHandlers.announceWinners();
+});
+
+cron.schedule('36 15 18 1 5', () => {
+    employeeOfTheMonthHandlers.announceWinners();
+    console.log('k');
 });
 
 // This interval will check every hour if the daily standup should be initiated
