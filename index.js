@@ -43,18 +43,18 @@ app.post("/", async function(req, res) {
 
     console.log('\n', data);
 
+    // if the message contained a mention
     if(data.event.type === "app_mention") {
-        // console.log('app was mentioned');
 
         return handleCommands(data);
 
+    // if the message is a standard message
     } else if(data.event.type === "message") {
-        // console.log('message was sent');
 
         let text = helpers.getTextMessage(data);
 
+        // if a point was given
         if(await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
-            // console.log('point was given');
 
             return employeeOfTheMonthHandlers.init(data);
      
@@ -65,6 +65,7 @@ app.post("/", async function(req, res) {
 
 });
 
+// Handles all possible commands
 async function handleCommands(data) {
 
     let message = helpers.getTextMessage(data);
@@ -120,11 +121,13 @@ function postRandomJoke(channel) {
 
 }
 
+// Posts all commands when user asks for help
 async function postCommands(channel, userID) {
 
     let commands = [
         { command: "score", description: "Returns the score for the employee of the month." },
-        { command: "joke", description: "You like dad jokes? This one is for you." }
+        { command: "joke", description: "You like dad jokes? This one is for you." },
+        { command: "emoticon :YOUR_EMOTICON:", description: "Change your emoticon to whatever you like." }
     ];
 
     let output = "";
