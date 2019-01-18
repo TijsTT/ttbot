@@ -11,9 +11,9 @@ module.exports.init = async function(data) {
 
     let mentionedUserId = helpers.getMentionedUserId(helpers.getTextMessage(data));
 
-    if(mentionedUserId === data.event.user) return slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+    if(mentionedUserId === helpers.getUserId(data)) return slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
 
-    let amountOfPoints = await helpers.getAmountOfPoints(helpers.getTextMessage(data), data.event.user);
+    let amountOfPoints = await helpers.getAmountOfPoints(helpers.getTextMessage(data), helpers.getUserId(data));
     let date = new Date();
     let dateString = `${date.getMonth()}/${date.getFullYear()}`;
 
@@ -115,7 +115,7 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
             })
         }
 
-        let usernameGiver = await slackHandlers.getSlackUsernameById(data.event.user);
+        let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
         let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
         
         month.save()

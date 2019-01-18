@@ -53,7 +53,7 @@ app.post("/", async function(req, res) {
 
         let text = helpers.getTextMessage(data);
 
-        if(await helpers.emoticonUsed(text, data.event.user) && helpers.userMentioned(text)) {
+        if(await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
             // console.log('point was given');
 
             return employeeOfTheMonthHandlers.init(data);
@@ -75,7 +75,7 @@ async function handleCommands(data) {
     switch(command) {
 
         case "help":
-            postCommands(data.event.channel, data.event.user);
+            postCommands(data.event.channel, helpers.getUserId(data));
             break;
 
         case "score":
@@ -83,7 +83,7 @@ async function handleCommands(data) {
             break;
 
         case "emoticon":
-            settingsUsersHandler.changeSettingsUserEmoticon(data.event.user, args[2]);
+            settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
             break;
 
         case "joke":
@@ -91,7 +91,7 @@ async function handleCommands(data) {
             break;
 
         case "dailystandupuser":
-            let dailyStandupUserID = await helpers.getMentionedUserId(args[2]);
+            let dailyStandupUserID = await helpers.getMentionedUserId(helpers.getTextMessage(data));
             dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
             break;
 

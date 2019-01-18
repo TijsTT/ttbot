@@ -104,7 +104,7 @@ module.exports.getSettingsUserEmoticon = async function(userID) {
                 if(userID !== process.env.BOT_ID) console.log(`For some reason you're not in our user list <@${userID}>. Who are you and what are you doing here!?`);
                 return resolve(':nooneisevergonnausethisasemoticon:');
             }
-
+            
             return resolve(result.emoticon);
 
         })

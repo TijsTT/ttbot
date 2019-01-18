@@ -71,6 +71,21 @@ module.exports.getTextMessage = function(data) {
 
 }
 
+// Returns the user id from a Slack data object
+module.exports.getUserId = function(data) {
+
+    let userID = "";
+
+    if(data.event.subtype && data.event.subtype === "message_changed") {
+        userID = data.event.message.user;
+    } else {
+        userID = data.event.user;
+    }
+
+    return userID;
+
+}
+
 // Returns if today is first monday of the month
 module.exports.isFirstMondayOfTheMonth = function() {
 
