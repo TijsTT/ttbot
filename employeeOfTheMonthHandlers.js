@@ -4,17 +4,16 @@ const mongoose = require('mongoose');
 const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
 
 const helpers = require('./helpers');
-const settings = require('./settings');
 const slackHandlers = require('./slackHandlers');
 
 // Initializes the process of adding points to an employee
-module.exports.init = function(data) {
+module.exports.init = async function(data) {
 
     let mentionedUserId = helpers.getMentionedUserId(helpers.getTextMessage(data));
 
     if(mentionedUserId === data.event.user) return slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
 
-    let amountOfPoints = helpers.getAmountOfPoints(helpers.getTextMessage(data));
+    let amountOfPoints = await helpers.getAmountOfPoints(helpers.getTextMessage(data), data.event.user);
     let date = new Date();
     let dateString = `${date.getMonth()}/${date.getFullYear()}`;
 
@@ -32,7 +31,7 @@ module.exports.init = function(data) {
 
         let output = await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
 
-        slackHandlers.chatPostMessage(output, settings.botChannel);
+        slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
 
     })
     .catch(err => {
@@ -108,7 +107,7 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
     
         }
 
-        if(newUser && userID !== "USLACKBOT" && userID !== settings.botId) {
+        if(newUser && userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
             month.employees.push({
                 _id: mongoose.Types.ObjectId(),
                 userID: userID,
@@ -187,8 +186,8 @@ module.exports.announceWinners = function() {
 
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(result => {
-        getScoreBoard(settings.botChannel);
-        slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", settings.botChannel)
+        getScoreBoard(process.env.BOT_CHANNEL);
+        slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL)
     })
     .catch(err => {
         console.log("Something went wrong announcing the winners?", err);

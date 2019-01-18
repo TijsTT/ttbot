@@ -1,6 +1,6 @@
 // This is the place for all helper functions. Mostly functions with a return value, used in other functions.
 
-const settings = require('./settings');
+const settingsUserHandler = require('./settingsUserHandler');
 
 // Returns if a user is mentioned in the given text
 module.exports.userMentioned = function(text) {
@@ -11,17 +11,23 @@ module.exports.userMentioned = function(text) {
 }
 
 // Returns if the given text contains the set emoticon
-module.exports.emoticonUsed = function(text) {
+module.exports.emoticonUsed = async function(text, userID) {
 
-    if(text.includes(settings.emoticon)) return true;
+    let userEmoticon = await settingsUserHandler.getSettingsUserEmoticon(userID);
+
+    if(!userEmoticon) return false;
+
+    if(text.includes(userEmoticon)) return true;
     return false;
 
 }
 
 // Returns the amount of set emoticons in the given text
-module.exports.getAmountOfPoints = function(text) {
+module.exports.getAmountOfPoints = async function(text, userID) {
 
-    let regex = new RegExp(settings.emoticon, "g");
+    let userEmoticon = await settingsUserHandler.getSettingsUserEmoticon(userID);
+
+    let regex = new RegExp(userEmoticon, "g");
     let count = (text.match(regex) || []).length;
 
     return count

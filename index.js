@@ -4,10 +4,10 @@ const request = require('request');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 
-const settings = require('./settings');
 const helpers = require('./helpers');
 const slackHandlers = require('./slackHandlers');
 const dailyStandupHandler = require('./dailyStandupHandler');
+const settingsUsersHandler = require('./settingsUserHandler');
 
 var app = express();
 
@@ -24,7 +24,7 @@ mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD
 
 const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers'); 
 
-app.post("/", function(req, res) {
+app.post("/", async function(req, res) {
 
     let data = req.body;
 
@@ -41,6 +41,8 @@ app.post("/", function(req, res) {
 
     console.log('\n', data);
 
+    if(data.event.subtype && data.event.subtype === 'bot_message') return;
+
     if(data.event.type === "app_mention") {
         // console.log('app was mentioned');
 
@@ -51,7 +53,7 @@ app.post("/", function(req, res) {
 
         let text = helpers.getTextMessage(data);
 
-        if(helpers.emoticonUsed(text) && helpers.userMentioned(text)) {
+        if(await helpers.emoticonUsed(text, data.event.user) && helpers.userMentioned(text)) {
             // console.log('point was given');
 
             return employeeOfTheMonthHandlers.init(data);
@@ -78,6 +80,10 @@ async function handleCommands(data) {
 
         case "score":
             employeeOfTheMonthHandlers.getScoreBoard(data.event.channel);
+            break;
+
+        case "emoticon":
+            settingsUsersHandler.changeSettingsUserEmoticon(data.event.user, args[2]);
             break;
 
         case "joke":
@@ -127,7 +133,7 @@ function postCommands(channel) {
         output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settings.emoticon}\nJust mention the person (@person) and add as many ${settings.emoticon} emojis to the message as you want to give them that many points!`
+    output += `\nTo thank employees for being awesome, you can award them by giving them a ${settingsUsersHandler.getSettingsUserEmoticon()}\nJust mention the person (@person) and add as many ${settingsUsersHandler.getSettingsUserEmoticon()} emojis to the message as you want to give them that many points!`
 
     return slackHandlers.chatPostMessage(output, channel);
 

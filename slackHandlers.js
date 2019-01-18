@@ -1,6 +1,7 @@
 // This is the place for all requests to the Slack API
 
 const request = require('request');
+const settingsUserHandler = require('./settingsUserHandler');
 
 // Posts the given message in the given channel on Slack
 module.exports.chatPostMessage = function(message, channel, attachments=undefined){
@@ -58,6 +59,9 @@ module.exports.getSlackUsersList = async function() {
 
             let body = JSON.parse(result.body);
             let usersList = [];
+
+            // UPDATES THE USERS IN THE DATABASE
+            settingsUserHandler.init(body);
 
             for(let i = 0; i < body.members.length; i++) {
 
