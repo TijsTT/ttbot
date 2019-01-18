@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const settings = require('./settings');
 const settingsUser = require('./models/settingsUser');
 const slackHandler = require('./slackHandlers');
 
