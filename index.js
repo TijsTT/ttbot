@@ -26,8 +26,6 @@ const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers');
 
 app.post("/", async function(req, res) {
 
-    console.log('post...');
-
     let data = req.body;
 
     if(data.challenge) {
@@ -72,6 +70,9 @@ async function handleCommands(data) {
     let message = helpers.getTextMessage(data);
 
     let args = message.split(" ");
+
+    if(!args[1]) return;
+    
 	let command = args[1].toLowerCase();
 
     switch(command) {
@@ -92,9 +93,9 @@ async function handleCommands(data) {
             postRandomJoke(data.event.channel);
             break;
         
-        case "nooneisevergonnausethiscommandinit":
-            slackHandlers.getSlackUsersList();
-            break;
+        // case "nooneisevergonnausethiscommandinit":
+        //     slackHandlers.getSlackUsersList();
+        //     break;
 
         case "dailystandupuser":
             let dailyStandupUserID = await helpers.getMentionedUserId(helpers.getTextMessage(data));

@@ -63,6 +63,8 @@ module.exports.getScoreBoard = function(channel) {
 
         for(let i = 0; i < result.employees.length; i++) {
 
+            if(parseInt(result.employees[i].points) === 0) continue;
+
             let username = "";
             for(let j = 0; j < usersList.length; j++) {
                 if(result.employees[i].userID === usersList[j].userID) {
