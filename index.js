@@ -90,6 +90,10 @@ async function handleCommands(data) {
         case "joke":
             postRandomJoke(data.event.channel);
             break;
+        
+        case "nooneisevergonnausethiscommandinit":
+            slackHandlers.getSlackUsersList();
+            break;
 
         case "dailystandupuser":
             let dailyStandupUserID = await helpers.getMentionedUserId(helpers.getTextMessage(data));
