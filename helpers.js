@@ -27,7 +27,7 @@ module.exports.getAmountOfPoints = async function(text, userID) {
 
     let userEmoticon = await settingsUserHandler.getSettingsUserEmoticon(userID);
 
-    let regex = new RegExp(userEmoticon, "g");
+    let regex = new RegExp(module.exports.escapeRegExp(userEmoticon), "g");
     let count = (text.match(regex) || []).length;
 
     return count
@@ -117,4 +117,8 @@ module.exports.isWorkDay = function() {
 
     return false;
 
+}
+
+module.exports.escapeRegExp = function(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
