@@ -9,36 +9,44 @@ const slackHandlers = require('./slackHandlers');
 // Initializes the process of adding points to an employee
 module.exports.init = async function(data) {
 
-    let mentionedUserId = helpers.getMentionedUserId(helpers.getTextMessage(data));
+    let mentionedUsersId = helpers.getMentionedUserId(helpers.getTextMessage(data));
 
-    if(mentionedUserId === helpers.getUserId(data)) return slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+    for(let i = 0; i < mentionedUsersId.length; i++) {
 
-    let amountOfPoints = await helpers.getAmountOfPoints(helpers.getTextMessage(data), helpers.getUserId(data));
-    let date = new Date();
-    let dateString = `${date.getMonth()}/${date.getFullYear()}`;
-
-    EmployeeOfTheMonth.findOne({ month: dateString })
-    .then(async result => {
-
-        let month;
-
-        if(result === null) {
-            console.log('init new month');
-            month = await initNewMonth(dateString);
-
+        if(mentionedUsersId[i] === helpers.getUserId(data)) {
+            
+            slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+        
         } else {
-            console.log('month found');
-            month = result;
+            
+            let amountOfPoints = await helpers.getAmountOfPoints(helpers.getTextMessage(data), helpers.getUserId(data));
+            let date = new Date();
+            let dateString = `${date.getMonth()}/${date.getFullYear()}`;
+
+            EmployeeOfTheMonth.findOne({ month: dateString })
+            .then(async result => {
+
+                let month;
+
+                if(result === null) {
+                    month = await initNewMonth(dateString);
+
+                } else {
+                    month = result;
+                }
+
+                let output = await addPointsToUser(month, mentionedUsersId[i], amountOfPoints, data);
+
+                slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
+
+            })
+            .catch(err => {
+                console.log(err);
+            })
+
         }
 
-        let output = await addPointsToUser(month, mentionedUserId, amountOfPoints, data);
-
-        slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
-
-    })
-    .catch(err => {
-        console.log(err);
-    })
+    }
 
 }
 
