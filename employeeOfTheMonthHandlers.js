@@ -23,9 +23,11 @@ module.exports.init = async function(data) {
         let month;
 
         if(result === null) {
+            console.log('init new month');
             month = await initNewMonth(dateString);
 
         } else {
+            console.log('month found');
             month = result;
         }
 

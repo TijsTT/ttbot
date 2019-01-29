@@ -62,7 +62,6 @@ app.post("/", async function(req, res) {
 
     }
 
-
 });
 
 // Handles all possible commands
