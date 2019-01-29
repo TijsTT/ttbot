@@ -26,6 +26,8 @@ const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers');
 
 app.post("/", async function(req, res) {
 
+    console.log('post...');
+
     let data = req.body;
 
     if(data.challenge) {
