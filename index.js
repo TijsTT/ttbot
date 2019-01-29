@@ -51,17 +51,14 @@ app.post("/", async function(req, res) {
     // if the message is a standard message
     } else if(data.event.type === "message") {
 
-        // let text = helpers.getTextMessage(data);
+        let text = helpers.getTextMessage(data);
 
-        // // if a point was given
-        // if(await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
+        // if a point was given
+        if(await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
 
-        //     return employeeOfTheMonthHandlers.init(data);
+            return employeeOfTheMonthHandlers.init(data);
      
-        // }
-
-        let users = await slackHandlers.getSlackUsersList();
-        console.log(users);
+        }
 
     }
 
