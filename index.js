@@ -98,7 +98,7 @@ async function handleCommands(data) {
         //     break;
 
         case "dailystandupuser":
-            let dailyStandupUserID = await helpers.getMentionedUserId(helpers.getTextMessage(data))[0];
+            let dailyStandupUserID = await helpers.getMentionedUsersId(helpers.getTextMessage(data))[0];
             dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
             break;
 

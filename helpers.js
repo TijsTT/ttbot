@@ -35,16 +35,16 @@ module.exports.getAmountOfPoints = async function(text, userID) {
 }
 
 // Returns the id of the mentioned user
-module.exports.getMentionedUserId = function(text) {
+module.exports.getMentionedUsersId = function(text) {
 
-    let regex = new RegExp("<@.*>", "g");
+    let regex = new RegExp("<@[^<]*>", "g");
     let mentionedUsers = text.match(regex);
 
     for(let i = 0; i < mentionedUsers.length; i++) {
         mentionedUsers[i].slice(2, mentionedUsers[i].length - 2);
         console.log(mentionedUsers[i]);
     }
-    
+
     return mentionedUsers;
 
 }

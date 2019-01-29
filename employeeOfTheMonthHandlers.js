@@ -9,7 +9,7 @@ const slackHandlers = require('./slackHandlers');
 // Initializes the process of adding points to an employee
 module.exports.init = async function(data) {
 
-    let mentionedUsersId = helpers.getMentionedUserId(helpers.getTextMessage(data));
+    let mentionedUsersId = helpers.getMentionedUsersId(helpers.getTextMessage(data));
 
     for(let i = 0; i < mentionedUsersId.length; i++) {
 
