@@ -41,7 +41,7 @@ module.exports.getMentionedUsersId = function(text) {
     let mentionedUsers = text.match(regex);
 
     for(let i = 0; i < mentionedUsers.length; i++) {
-        mentionedUsers[i] = mentionedUsers[i].slice(2, mentionedUsers[i].length - 2);
+        mentionedUsers[i] = mentionedUsers[i].slice(2, mentionedUsers[i].length - 1);
         console.log(mentionedUsers[i]);
     }
 
