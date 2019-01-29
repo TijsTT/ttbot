@@ -36,7 +36,7 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
 
 }
 
-// Gets Slacks
+// Gets Slacks user list
 module.exports.getSlackUsersList = async function() {
 
     return new Promise((resolve, reject) => {
