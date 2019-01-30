@@ -133,7 +133,11 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
         
         month.save()
         .then(result => {
-            return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
+            if(newUser && userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
+                return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
+            } else {
+                return resolve(`That's very nice of you ${usernameGiver}, but bots are not allowed to receive points :upside_down_face:`)
+            }
         })
         .catch(err => {
             bugsnagClient.notify(new Error(err));
