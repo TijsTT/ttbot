@@ -4,12 +4,15 @@ const request = require('request');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 
+var app = express();
+
+var bugsnag = require('@bugsnag/js');
+const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
+
 const helpers = require('./helpers');
 const slackHandlers = require('./slackHandlers');
 const dailyStandupHandler = require('./dailyStandupHandler');
 const settingsUsersHandler = require('./settingsUserHandler');
-
-var app = express();
 
 // Bodyparser middleware
 var bodyParser = require('body-parser');
@@ -20,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { 
 	useNewUrlParser: true,
 }).then(result => console.log("Connected to the database."))
-.catch(err => console.log("Something went wrong when connecting to the database."));
+.catch(err => bugsnagClient.notify(new Error(err)));
 
 const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers'); 
 
@@ -97,10 +100,10 @@ async function handleCommands(data) {
         //     slackHandlers.getSlackUsersList();
         //     break;
 
-        case "dailystandupuser":
-            let dailyStandupUserID = await helpers.getMentionedUsersId(helpers.getTextMessage(data))[0];
-            dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
-            break;
+        // case "dailystandupuser":
+        //     let dailyStandupUserID = await helpers.getMentionedUsersId(helpers.getTextMessage(data))[0];
+        //     dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
+        //     break;
 
         default:
             break;
@@ -118,7 +121,10 @@ function postRandomJoke(channel) {
 
     request(clientServerOptions, (err, result) => {
 
-        if(err) return "Something went wrong getting a joke.";
+        if(err) {
+            bugsnagClient.notify(new Error(err));
+            return slackHandlers.chatPostMessage("The joke is a lie.", channel);
+        }
 
         let joke = JSON.parse(result.body);
         return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
@@ -154,7 +160,7 @@ async function postCommands(channel, userID) {
 cron.schedule('*/5 * * * *', () => {
     console.log('Pinging server so it doesn\'t go to sleep...');
     request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
-        if(err) console.log('Something went wrong while pinging the ttbot.', err);
+        if(err) bugsnagClient.notify(new Error(err));;
     })
 });
 

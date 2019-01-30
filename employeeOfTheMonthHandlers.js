@@ -1,5 +1,6 @@
 // Here every function that's connected to the EmployeeOfTheMonth collection is located.
-
+var bugsnag = require('@bugsnag/js');
+const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
 const mongoose = require('mongoose');
 const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
 
@@ -41,7 +42,7 @@ module.exports.init = async function(data) {
 
             })
             .catch(err => {
-                console.log(err);
+                bugsnagClient.notify(new Error(err));
             })
 
         }
@@ -97,7 +98,7 @@ module.exports.getScoreBoard = function(channel) {
 
     })
     .catch(err => {
-        console.log(err);
+        bugsnagClient.notify(new Error(err));
         return slackHandlers.chatPostMessage("Something went wrong searching the database", data.event.channel);
     })
 
@@ -135,7 +136,7 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
             return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
         })
         .catch(err => {
-            console.log(err);
+            bugsnagClient.notify(new Error(err));
             return reject(`Something went wrong while adding the points you awarded ${usernameGiver}. Devs should look into this.`);
         })
 
@@ -173,7 +174,7 @@ async function initNewMonth(date) {
             resolve(result);
         })
         .catch(err => {
-            console.log(err);
+            bugsnagClient.notify(new Error(err));
             reject();
         })
 
@@ -202,7 +203,7 @@ module.exports.announceWinners = function() {
         slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL)
     })
     .catch(err => {
-        console.log("Something went wrong announcing the winners?", err);
+        bugsnagClient.notify(new Error(err));
     })
 
 }

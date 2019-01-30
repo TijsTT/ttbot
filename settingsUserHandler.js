@@ -1,3 +1,5 @@
+var bugsnag = require('@bugsnag/js');
+const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
 const mongoose = require('mongoose');
 const settingsUser = require('./models/settingsUser');
 const slackHandler = require('./slackHandlers');
@@ -9,7 +11,7 @@ module.exports.init = function(data) {
         result ? updateSettingsUsers(data, result) : createSettingsUsers(data);
     })
     .catch((err) => {
-        console.log(err);
+        bugsnagClient.notify(new Error(err));
     })
 
 }
@@ -64,7 +66,7 @@ function createNewSettingsUser(userID, username) {
         console.log('New settingsUser was saved to the database.');
     })
     .catch((err) => {
-        console.log('Something went wrong saving a new settingsUser...', err);
+        bugsnagClient.notify(new Error(err));
     })
 
 }
@@ -83,12 +85,12 @@ module.exports.changeSettingsUserEmoticon = function(userID, emoticon) {
             return slackHandler.chatPostMessage(`Successfully changed ${result.username}'s emoticon to ${emoticon}`, process.env.BOT_CHANNEL);
         })
         .catch((err) => {
-            console.log('Something went wrong when changing this settingsUser\'s emoticon...', err);
+            bugsnagClient.notify(new Error(err));
         })
 
     })
     .catch((error) => {
-        console.log('Something went wrong when searching for this user...', error);
+        bugsnagClient.notify(new Error(error));
     })
 
 }
@@ -108,8 +110,8 @@ module.exports.getSettingsUserEmoticon = async function(userID) {
             return resolve(result.emoticon);
 
         })
-        .catch((error) => {
-            console.log('Something went wrong when searching for this user...', error);
+        .catch((err) => {
+            bugsnagClient.notify(new Error(err));
             return reject();
         });
 

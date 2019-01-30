@@ -1,5 +1,6 @@
 // This is the place for all requests to the Slack API
-
+var bugsnag = require('@bugsnag/js');
+const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
 const request = require('request');
 const settingsUserHandler = require('./settingsUserHandler');
 
@@ -31,7 +32,7 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
     }
 
     request(clientServerOptions, (err) => {
-        if(err) console.log("Something went wrong posting the message.\n", err);
+        if(err) bugsnagClient.notify(new Error(err));
     });
 
 }
@@ -53,7 +54,7 @@ module.exports.getSlackUsersList = async function() {
         request(clientServerOptions, (err, result) => {
 
             if(err) {
-                console.log("Something went wrong while getting the users list.\n", err);
+                bugsnagClient.notify(new Error(err));
                 return reject("no user list");      
             }
 
@@ -98,8 +99,8 @@ module.exports.getSlackUsernameById = async function(userID) {
         request(clientServerOptions, (err, result) => {
 
             if(err) {
-                console.log("Something went wrong while getting the users list.\n", err);
-                return reject("no user list");      
+                bugsnagClient.notify(new Error(err));
+                return reject("No user list...");      
             }
 
             let body = JSON.parse(result.body);
@@ -112,7 +113,7 @@ module.exports.getSlackUsernameById = async function(userID) {
                     
             }
 
-            return reject("no user with this id in user list"); 
+            return reject("No user with this id in user list..."); 
 
         });
 
