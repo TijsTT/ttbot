@@ -128,15 +128,15 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
                 points: amountOfPoints
             })
         }
-
-        let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
-        let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
         
         month.save()
         .then(result => {
             if(userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
+                let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
+                let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
                 return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
             } else {
+                let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
                 return resolve(`That's very nice of you ${usernameGiver}, but bots are not allowed to receive points :upside_down_face:`)
             }
         })
