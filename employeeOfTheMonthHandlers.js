@@ -130,7 +130,7 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
         }
         
         month.save()
-        .then(result => {
+        .then(async result => {
             if(userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
                 let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
                 let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
