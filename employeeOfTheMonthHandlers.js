@@ -16,7 +16,7 @@ module.exports.init = async function(data) {
 
         if(mentionedUsersId[i] === helpers.getUserId(data)) {
             
-            slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", data.event.channel);
+            slackHandlers.chatPostMessage("You can't give points to yourself. Nice try.", process.env.BOT_CHANNEL);
         
         } else {
             
