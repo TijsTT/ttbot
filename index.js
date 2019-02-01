@@ -57,7 +57,7 @@ app.post("/", async function(req, res) {
         let text = helpers.getTextMessage(data);
 
         // if a point was given
-        if(await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
+        if(helpers.getUserId(data) !== undefined && await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
 
             return employeeOfTheMonthHandlers.init(data);
      
