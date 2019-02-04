@@ -75,6 +75,7 @@ module.exports.getSlackUsersList = async function() {
                 }
                     
             }
+            console.log(usersList);
 
             return resolve(usersList);
 
