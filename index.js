@@ -42,7 +42,7 @@ app.post("/", async function(req, res) {
         res.sendStatus(200);
     }
 
-    if(data.event.subtype && data.event.subtype === 'bot_message') return;
+    // if(data.event.subtype && data.event.subtype === 'bot_message') return;
 
     console.log('\n', data);
 
