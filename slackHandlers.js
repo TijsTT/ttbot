@@ -60,7 +60,6 @@ module.exports.getSlackUsersList = async function() {
 
             let body = JSON.parse(result.body);
             let usersList = [];
-            console.log(body);
 
             // UPDATES THE USERS IN THE DATABASE
             settingsUserHandler.init(body);
@@ -75,7 +74,6 @@ module.exports.getSlackUsersList = async function() {
                 }
                     
             }
-            console.log(usersList);
 
             return resolve(usersList);
 

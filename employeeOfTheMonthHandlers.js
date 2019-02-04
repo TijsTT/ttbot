@@ -83,6 +83,8 @@ module.exports.getScoreBoard = function(channel) {
                 }
             }
 
+            if(username === "") continue;
+
             let icon;
             i < 3 ? icon = icons[i] : icon = icons[3];
 
@@ -111,6 +113,16 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
     return new Promise(async (resolve, reject) => {
 
         let newUser = true;
+        let isUser = false;
+        let usersList = await slackHandlers.getSlackUsersList();
+
+        for(let i = 0; i < usersList.length; i++) {
+            if(usersList[i].userID === userID) {
+                isUser = true;
+            }
+        }
+
+        if(!isUser) return resolve(`That's very nice of you ${usernameGiver}, but bots are not allowed to receive points :upside_down_face:`)
         
         for(let i = 0; i < month.employees.length; i++) {
 
@@ -121,24 +133,20 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
     
         }
 
-        if(newUser && userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
+        if(newUser) {
             month.employees.push({
                 _id: mongoose.Types.ObjectId(),
                 userID: userID,
                 points: amountOfPoints
             })
         }
+
+        let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
+        let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
         
         month.save()
         .then(async result => {
-            if(userID !== "USLACKBOT" && userID !== process.env.BOT_ID) {
-                let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
-                let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
-                return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
-            } else {
-                let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
-                return resolve(`That's very nice of you ${usernameGiver}, but bots are not allowed to receive points :upside_down_face:`)
-            }
+            return resolve(`${usernameGiver} just awarded ${amountOfPoints} points to ${usernameReceiver}!`);
         })
         .catch(err => {
             bugsnagClient.notify(new Error(err));
