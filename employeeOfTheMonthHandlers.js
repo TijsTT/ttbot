@@ -83,6 +83,7 @@ module.exports.getScoreBoard = function(channel) {
                 }
             }
 
+            // Makes up for an early problem where bots were saved in the db to get points
             if(username === "") continue;
 
             let icon;
@@ -115,6 +116,8 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
         let newUser = true;
         let isUser = false;
         let usersList = await slackHandlers.getSlackUsersList();
+        let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
+        let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
 
         for(let i = 0; i < usersList.length; i++) {
             if(usersList[i].userID === userID) {
@@ -140,9 +143,6 @@ async function addPointsToUser(month, userID, amountOfPoints, data) {
                 points: amountOfPoints
             })
         }
-
-        let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
-        let usernameReceiver = await slackHandlers.getSlackUsernameById(userID);
         
         month.save()
         .then(async result => {
