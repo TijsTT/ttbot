@@ -92,7 +92,7 @@ async function handleCommands(data) {
             settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
             break;
 
-        case "joke":
+        case "tell me a joke":
             postRandomJoke(data.event.channel);
             break;
         
@@ -138,7 +138,7 @@ async function postCommands(channel, userID) {
 
     let commands = [
         { command: "score", description: "Returns the score for the employee of the month." },
-        { command: "joke", description: "You like dad jokes? This one is for you." },
+        { command: "tell me a joke", description: "You like dad jokes? This one is for you." },
         { command: "emoticon :YOUR_EMOTICON:", description: "Change your emoticon to whatever you like." }
     ];
 
