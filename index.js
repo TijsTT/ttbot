@@ -92,8 +92,8 @@ async function handleCommands(data) {
             settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
             break;
 
-        case "tell me a joke":
-            postRandomJoke(data.event.channel);
+        case "tell":
+            if(args[2].toLowerCase() === "me" && args[3].toLowerCase() === "a" && args[4].toLowerCase() === "joke") postRandomJoke(data.event.channel);
             break;
         
         // case "nooneisevergonnausethiscommandinit":
