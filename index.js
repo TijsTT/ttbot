@@ -93,7 +93,7 @@ async function handleCommands(data) {
             else {
                 let userID = helpers.getUserId(data);
                 let userEmoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
-                slackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, channel, userID);
+                slackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, data.event.channel, userID);
             }
             break;
 
