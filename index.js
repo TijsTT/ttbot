@@ -89,7 +89,12 @@ async function handleCommands(data) {
             break;
 
         case "emoticon":
-            settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
+            if(args[2]) settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
+            else {
+                let userID = helpers.getUserId(data);
+                let userEmoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
+                slackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, channel, userID);
+            }
             break;
 
         case "tell":
