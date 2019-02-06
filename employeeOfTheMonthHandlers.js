@@ -14,6 +14,8 @@ module.exports.init = async function(data) {
 
     for(let i = 0; i < mentionedUsersId.length; i++) {
 
+        if(mentionedUsersId[i] === process.env.BOT_ID) continue;
+
         if(mentionedUsersId[i] === helpers.getUserId(data)) {
             
             let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
@@ -36,7 +38,7 @@ module.exports.init = async function(data) {
                 } else {
                     month = result;
                 }
-
+                
                 let output = await addPointsToUser(month, mentionedUsersId[i], amountOfPoints, data);
 
                 slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
