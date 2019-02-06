@@ -71,7 +71,6 @@ app.post("/", async function(req, res) {
 async function handleCommands(data) {
 
     let message = helpers.getTextMessage(data);
-
     let args = message.split(" ");
 
     if(!args[1]) return;
@@ -95,6 +94,9 @@ async function handleCommands(data) {
                 let userEmoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
                 slackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, data.event.channel, userID);
             }
+            break;
+        case "emojilist":
+            settingsUsersHandler.postAllSettingsUserEmoticons();
             break;
 
         case "tell":
@@ -170,7 +172,7 @@ cron.schedule('*/5 * * * *', () => {
 });
 
 // This interval will check every hour if the winners can be announced
-cron.schedule('0 9 1,2,3,4,5,6,7 * 1', () => {
+cron.schedule('0 9 1-7 * 1', () => {
     employeeOfTheMonthHandlers.announceWinners();
 });
 

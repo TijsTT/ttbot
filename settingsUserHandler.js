@@ -118,3 +118,24 @@ module.exports.getSettingsUserEmoticon = async function(userID) {
     })
 
 }
+
+module.exports.postAllSettingsUserEmoticons = function() {
+
+    return new Promise((resolve, reject) => {
+
+        settingsUser.find()
+        .then((result) => {
+
+            // TO BE CONTINUED...
+
+            return resolve();
+
+        })
+        .catch((err) => {
+            bugsnagClient.notify(new Error(err));
+            return reject();
+        });
+
+    })
+
+}
