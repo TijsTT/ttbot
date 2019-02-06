@@ -5,26 +5,44 @@ const request = require('request');
 const settingsUserHandler = require('./settingsUserHandler');
 
 // Posts the given message in the given channel on Slack
-module.exports.chatPostMessage = function(message, channel, hidden, attachments=undefined){
+module.exports.chatPostMessage = function(message, channel, attachments=undefined){
 
-    let body,
-        method = hidden ? "chat.postEphemeral" : "chat.postMessage";
-
-    if(attachments) {
-        body = {
-            "text": message,
-            "channel": channel,
-            "attachments": attachments
-        }
-    } else {
-        body = {
-            "text": message,
-            "channel": channel
-        }
+    body = {
+        "text": message,
+        "channel": channel
     }
 
+    if(attachments) body.attachments = attachments;
+
     let clientServerOptions = {
-        uri: `https://slack.com/api/${method}`,
+        uri: `https://slack.com/api/chat.postMessage`,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+        },
+        body: JSON.stringify(body)
+    }
+
+    request(clientServerOptions, (err) => {
+        if(err) bugsnagClient.notify(new Error(err));
+    });
+
+}
+
+// Posts the given message in the given channel on Slack as hidden message
+module.exports.chatPostEphemeralMessage = function(message, channel, userID, attachments=undefined){
+
+    body = {
+        "text": message,
+        "channel": channel,
+        "user": userID
+    }
+
+    if(attachments) body.attachments = attachments;
+
+    let clientServerOptions = {
+        uri: `https://slack.com/api/chat.postEphemeral`,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

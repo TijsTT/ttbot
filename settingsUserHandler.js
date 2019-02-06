@@ -76,13 +76,13 @@ module.exports.changeSettingsUserEmoticon = function(userID, emoticon) {
     settingsUser.findOne({ userID: userID })
     .then((result) => {
 
-        if(!result) return slackHandler.chatPostMessage(`For some reason you're not in our user list <@${userID}>. Who are you and what are you doing here!?`, process.env.BOT_CHANNEL, false);
+        if(!result) return slackHandler.chatPostMessage(`For some reason you're not in our user list <@${userID}>. Who are you and what are you doing here!?`, process.env.BOT_CHANNEL);
 
         result.emoticon = emoticon;
 
         result.save()
         .then(() => {
-            return slackHandler.chatPostMessage(`Successfully changed ${result.username}'s emoticon to ${emoticon}`, process.env.BOT_CHANNEL, false);
+            return slackHandler.chatPostMessage(`Successfully changed ${result.username}'s emoticon to ${emoticon}`, process.env.BOT_CHANNEL);
         })
         .catch((err) => {
             bugsnagClient.notify(new Error(err));
