@@ -17,7 +17,7 @@ module.exports.init = async function(data) {
         if(mentionedUsersId[i] === helpers.getUserId(data)) {
             
             let usernameGiver = await slackHandlers.getSlackUsernameById(helpers.getUserId(data));
-            slackHandlers.chatPostMessage(`You can't give points to yourself ${usernameGiver}. Nice try.`, process.env.BOT_CHANNEL);
+            slackHandlers.chatPostMessage(`You can't give points to yourself ${usernameGiver}. Nice try.`, process.env.BOT_CHANNEL, false);
         
         } else {
             
@@ -39,7 +39,7 @@ module.exports.init = async function(data) {
 
                 let output = await addPointsToUser(month, mentionedUsersId[i], amountOfPoints, data);
 
-                slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
+                slackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL, false);
 
             })
             .catch(err => {
@@ -61,7 +61,7 @@ module.exports.getScoreBoard = function(channel) {
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(async result => {
 
-        if(result === null) { return slackHandlers.chatPostMessage("This month there are no points given yet.", channel)}
+        if(result === null) { return slackHandlers.chatPostMessage("This month there are no points given yet.", channel, false)}
 
         let output = "";
         let usersList = await slackHandlers.getSlackUsersList();
@@ -98,12 +98,12 @@ module.exports.getScoreBoard = function(channel) {
             "color": "#58b4e5"
         }]
 
-        return slackHandlers.chatPostMessage("Behold the scoreboard", channel, attachments);
+        return slackHandlers.chatPostMessage("Behold the scoreboard", channel, false, attachments);
 
     })
     .catch(err => {
         bugsnagClient.notify(new Error(err));
-        return slackHandlers.chatPostMessage("Something went wrong searching the database", data.event.channel);
+        return slackHandlers.chatPostMessage("Something went wrong searching the database", data.event.channel, false);
     })
 
 }
@@ -207,7 +207,7 @@ module.exports.announceWinners = function() {
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(result => {
         module.exports.getScoreBoard(process.env.BOT_CHANNEL);
-        slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL)
+        slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL, false)
     })
     .catch(err => {
         bugsnagClient.notify(new Error(err));

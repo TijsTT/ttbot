@@ -5,9 +5,11 @@ const request = require('request');
 const settingsUserHandler = require('./settingsUserHandler');
 
 // Posts the given message in the given channel on Slack
-module.exports.chatPostMessage = function(message, channel, attachments=undefined){
+module.exports.chatPostMessage = function(message, channel, hidden, attachments=undefined){
 
-    let body;
+    let body,
+        method = hidden ? "chat.postEphemeral" : "chat.postMessage";
+
     if(attachments) {
         body = {
             "text": message,
@@ -22,7 +24,7 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
     }
 
     let clientServerOptions = {
-        uri: 'https://slack.com/api/chat.postMessage',
+        uri: `https://slack.com/api/${method}`,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

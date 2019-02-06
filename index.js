@@ -123,11 +123,11 @@ function postRandomJoke(channel) {
 
         if(err) {
             bugsnagClient.notify(new Error(err));
-            return slackHandlers.chatPostMessage("The joke is a lie.", channel);
+            return slackHandlers.chatPostMessage("The joke is a lie.", channel, false);
         }
 
         let joke = JSON.parse(result.body);
-        return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
+        return slackHandlers.chatPostMessage(joke.attachments[0].text, channel, false);
 
     }); 
 
@@ -152,7 +152,7 @@ async function postCommands(channel, userID) {
 
     output += `\nTo thank employees for being awesome, you can award them by giving them a ${emoticon}\nJust mention the person (@person) and add as many ${emoticon} emojis to the message as you want to give them that many points!`
 
-    return slackHandlers.chatPostMessage(output, channel);
+    return slackHandlers.chatPostMessage(output, channel, true);
 
 }
 
