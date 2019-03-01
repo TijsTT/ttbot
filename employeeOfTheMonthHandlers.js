@@ -55,10 +55,7 @@ module.exports.init = async function(data) {
 }
 
 // Returns the scoreboard at this time
-module.exports.getScoreBoard = function(channel) {
-
-    let date = new Date();
-    let dateString = `${date.getMonth()}/${date.getFullYear()}`;
+module.exports.getScoreBoard = function(channel, dateString) {
 
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(async result => {
@@ -208,7 +205,7 @@ module.exports.announceWinners = function() {
 
     EmployeeOfTheMonth.findOne({ month: dateString })
     .then(result => {
-        module.exports.getScoreBoard(process.env.BOT_CHANNEL);
+        module.exports.getScoreBoard(process.env.BOT_CHANNEL, dateString);
         slackHandlers.chatPostMessage("@channel Congratulations to everyone! Good luck next month!", process.env.BOT_CHANNEL)
     })
     .catch(err => {

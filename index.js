@@ -84,7 +84,9 @@ async function handleCommands(data) {
             break;
 
         case "score":
-            employeeOfTheMonthHandlers.getScoreBoard(data.event.channel);
+            let date = new Date();
+            let currentMonth = `${date.getMonth()}/${date.getFullYear()}`;
+            employeeOfTheMonthHandlers.getScoreBoard(data.event.channel, currentMonth);
             break;
 
         case "emoticon":
@@ -171,13 +173,12 @@ cron.schedule('*/5 * * * *', () => {
     })
 });
 
-// This interval will check every hour if the winners can be announced
-cron.schedule('0 9 1-7 * 1', () => {
-    employeeOfTheMonthHandlers.announceWinners();
+cron.schedule('0 9 * * 1', () => {
+    let date = new Date();
+    if(date.getDate() < 8) employeeOfTheMonthHandlers.announceWinners();
 });
 
-// This interval will check every hour if the daily standup should be initiated
-cron.schedule('0 0 * * *', () => {
+cron.schedule('0 0 0 * * *', () => {
     dailyStandupHandler.possiblyInit();
 })
 
