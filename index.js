@@ -166,7 +166,7 @@ async function postCommands(channel, userID) {
 }
 
 // Interval loop to prevent server from going into sleep mode
-cron.schedule('*/5 * * * *', () => {
+cron.schedule('*/5 7-23 * * *', () => {
     console.log('Pinging server so it doesn\'t go to sleep...');
     request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
         if(err) bugsnagClient.notify(new Error(err));;
@@ -178,7 +178,7 @@ cron.schedule('0 9 * * 1', () => {
     if(date.getDate() < 8) employeeOfTheMonthHandlers.announceWinners();
 });
 
-cron.schedule('0 0 0 * * *', () => {
+cron.schedule('0 0 * * *', () => {
     dailyStandupHandler.possiblyInit();
 })
 
