@@ -124,14 +124,22 @@ module.exports.getSlackUsernameById = async function(userID) {
             }
 
             let body = JSON.parse(result.body);
-            console.log(body);
 
-            for(let i = 0; i < body.members.length; i++) {
+            if(body.ok) {
 
-                if(body.members[i].id == userID) {
-                    return resolve(body.members[i].name);
+                for(let i = 0; i < body.members.length; i++) {
+
+                    if(body.members[i].id == userID) {
+                        return resolve(body.members[i].name);
+                    }
+                        
                 }
-                    
+
+            } else {
+
+                console.log(`body.ok error: ${body.error}`);
+                return resolve('someone');
+
             }
 
             return reject("No user with this id in user list..."); 
