@@ -124,6 +124,7 @@ module.exports.getSlackUsernameById = async function(userID) {
             }
 
             let body = JSON.parse(result.body);
+            console.log(body);
 
             for(let i = 0; i < body.members.length; i++) {
 
