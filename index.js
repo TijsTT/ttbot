@@ -166,7 +166,7 @@ async function postCommands(channel, userID) {
 }
 
 // Interval loop to prevent server from going into sleep mode
-cron.schedule('*/5 6-23 * * *', () => {
+cron.schedule('*/5 * * * *', () => {
     console.log('Pinging server so it doesn\'t go to sleep...');
     request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
         if(err) bugsnagClient.notify(new Error(err));;
