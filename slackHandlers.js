@@ -8,28 +8,32 @@ const settingsUserHandler = require('./settingsUserHandler');
 // Posts the given message in the given channel on Slack
 module.exports.chatPostMessage = function(message, channel, attachments=undefined){
 
-    body = {
+    let body = {
         "text": message,
         "channel": channel
     }
 
     if(attachments) body.attachments = attachments;
 
-    let clientServerOptions = {
-        url: `https://slack.com/api/chat.postMessage`,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
-        },
-        body: JSON.stringify(body)
+    body = JSON.stringify(body);
+
+    let headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
     }
+
+    // let options = {
+    //     url: 'https://slack.com/api/chat.postMessage',
+    //     method: 'POST',
+    //     ,
+    //     body: JSON.stringify(body)
+    // }
 
     // request(clientServerOptions, (err) => {
     //     if(err) bugsnagClient.notify(new Error(err));
     // });
 
-    axios.post(clientServerOptions)
+    axios.post('https://slack.com/api/chat.postMessage', body, { headers: headers })
     .then((result) => {
         console.log('It works', result);
     })
