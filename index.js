@@ -144,8 +144,8 @@ function postRandomJoke(channel) {
     axios.get('https://icanhazdadjoke.com/slack')
     .then((response) => {
         // console.log(response);
+        console.log(response.data);
         let joke = JSON.parse(response.body);
-        console.log(joke);
         return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
     })
     .catch((err) => {
