@@ -32,7 +32,7 @@ app.post("/", async function(req, res) {
     let data = req.body;
     let userID = helpers.getUserId(data);
 
-    handleSlackAuthorization();
+    handleSlackAuthorization(data, res);
 
     if(data.event.subtype && data.event.subtype === 'bot_message') return;
     if(userID !== undefined) return;
@@ -111,7 +111,7 @@ async function handleCommands(data) {
 
 }
 
-function handleSlackAuthorization() {
+function handleSlackAuthorization(data, res) {
     if(data.challenge) {
         res.type('text/plain'); 
         res.send(data.challenge);
