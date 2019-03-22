@@ -29,11 +29,13 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
     //     if(err) bugsnagClient.notify(new Error(err));
     // });
 
-    axios.head({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+    axios.post('https://slack.com/api/chat.postMessage', {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+        },
+        body: JSON.stringify(body)
     })
-    .post('https://slack.com/api/chat.postMessage', body)
     .then((result) => {
         console.log('It works', result);
     })
