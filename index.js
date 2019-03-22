@@ -142,11 +142,13 @@ function postRandomJoke(channel) {
     // }); 
 
     axios.get('https://icanhazdadjoke.com/slack')
-    .then(result => {
-        let joke = JSON.parse(result.body);
+    .then((response) => {
+        console.log(response);
+        let joke = JSON.parse(response.body);
+        console.log(joke);
         return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
     })
-    .catch(err => {
+    .catch((err) => {
         bugsnagClient.notify(new Error(err));
         return slackHandlers.chatPostMessage("The joke is a lie.", channel);
     });
