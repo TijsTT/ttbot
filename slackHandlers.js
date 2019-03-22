@@ -15,27 +15,21 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
 
     if(attachments) body.attachments = attachments;
 
-    // let clientServerOptions = {
-    //     uri: `https://slack.com/api/chat.postMessage`,
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
-    //     },
-    //     body: JSON.stringify(body)
-    // }
-
-    // request(clientServerOptions, (err) => {
-    //     if(err) bugsnagClient.notify(new Error(err));
-    // });
-
-    axios.post('https://slack.com/api/chat.postMessage', {
+    let clientServerOptions = {
+        url: `https://slack.com/api/chat.postMessage`,
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
         },
         body: JSON.stringify(body)
-    })
+    }
+
+    // request(clientServerOptions, (err) => {
+    //     if(err) bugsnagClient.notify(new Error(err));
+    // });
+
+    axios.post(clientServerOptions)
     .then((result) => {
         console.log('It works', result);
     })
