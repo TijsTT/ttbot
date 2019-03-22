@@ -2,6 +2,7 @@
 var bugsnag = require('@bugsnag/js');
 const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
 const request = require('request');
+const axios = require('axios');
 const settingsUserHandler = require('./settingsUserHandler');
 
 // Posts the given message in the given channel on Slack
@@ -14,19 +15,31 @@ module.exports.chatPostMessage = function(message, channel, attachments=undefine
 
     if(attachments) body.attachments = attachments;
 
-    let clientServerOptions = {
-        uri: `https://slack.com/api/chat.postMessage`,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
-        },
-        body: JSON.stringify(body)
-    }
+    // let clientServerOptions = {
+    //     uri: `https://slack.com/api/chat.postMessage`,
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify(body)
+    // }
 
-    request(clientServerOptions, (err) => {
-        if(err) bugsnagClient.notify(new Error(err));
-    });
+    // request(clientServerOptions, (err) => {
+    //     if(err) bugsnagClient.notify(new Error(err));
+    // });
+
+    axios.head({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.BOT_USER_OAUTH_ACCESS_TOKEN}`
+    })
+    .post('https://slack.com/api/chat.postMessage', body)
+    .then((result) => {
+        console.log('It works', result);
+    })
+    .catch((err) => {
+        bugsnagClient.notify(new Error(err));
+    })
 
 }
 

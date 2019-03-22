@@ -124,23 +124,6 @@ function handleSlackAuthorization(data, res) {
 
 function postRandomJoke(channel) {
 
-    // let clientServerOptions = {
-    //     uri: 'https://icanhazdadjoke.com/slack',
-    //     method: 'GET'
-    // }
-
-    // request(clientServerOptions, (err, result) => {
-
-    //     if(err) {
-    //         bugsnagClient.notify(new Error(err));
-    //         return slackHandlers.chatPostMessage("The joke is a lie.", channel);
-    //     }
-
-    //     let joke = JSON.parse(result.body);
-    //     return slackHandlers.chatPostMessage(joke.attachments[0].text, channel);
-
-    // }); 
-
     axios.get('https://icanhazdadjoke.com/slack')
     .then((response) => {
         let joke = response.data.attachments[0].text;
