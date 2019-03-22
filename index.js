@@ -35,7 +35,7 @@ app.post("/", async function(req, res) {
     handleSlackAuthorization(data, res);
 
     if(data.event.subtype && data.event.subtype === 'bot_message') return;
-    if(userID !== undefined) return;
+    if(userID === undefined) return;
 
     // log the incoming message
     console.log('\n', data);
