@@ -30,20 +30,14 @@ const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers');
 app.post("/", async function(req, res) {
 
     let data = req.body;
+    let userID = helpers.getUserId(data);
 
-    if(data.challenge) {
-
-        // FOR EVENT AUTHORIZATION (DOCS: https://api.slack.com/bot-users)
-        res.type('text/plain'); 
-        res.send(data.challenge);
-        return;
-
-    } else {
-        res.sendStatus(200);
-    }
+    handleSlackAuthorization();
 
     if(data.event.subtype && data.event.subtype === 'bot_message') return;
+    if(userID !== undefined) return;
 
+    // log the incoming message
     console.log('\n', data);
 
     // if the message contained a mention
@@ -57,10 +51,8 @@ app.post("/", async function(req, res) {
         let text = helpers.getTextMessage(data);
 
         // if a point was given
-        if(helpers.getUserId(data) !== undefined && await helpers.emoticonUsed(text, helpers.getUserId(data)) && helpers.userMentioned(text)) {
-
+        if(await helpers.emoticonUsed(text, userID) && helpers.userMentioned(text)) {
             return employeeOfTheMonthHandlers.init(data);
-     
         }
 
     }
@@ -74,10 +66,8 @@ async function handleCommands(data) {
     let args = message.split(" ");
 
     if(!args[1]) return;
-    
-	let command = args[1].toLowerCase();
 
-    switch(command) {
+    switch(args[1].toLowerCase()) {
 
         case "help":
             postCommands(data.event.channel, helpers.getUserId(data));
@@ -119,6 +109,16 @@ async function handleCommands(data) {
 
     }
 
+}
+
+function handleSlackAuthorization() {
+    if(data.challenge) {
+        res.type('text/plain'); 
+        res.send(data.challenge);
+        return;
+    } else {
+        res.sendStatus(200);
+    }
 }
 
 function postRandomJoke(channel) {
