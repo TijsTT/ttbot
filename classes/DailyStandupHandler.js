@@ -1,10 +1,9 @@
 // Here every function that's connected to the DailyStandupUser collection is located.
 
 const mongoose = require('mongoose');
-const dailyStandupUser = require('./models/dailyStandupUser.js');
+const dailyStandupUser = require('../models/dailyStandupUser.js');
 
-const helpers = require('./helpers');
-const slackHandlers = require('./slackHandlers');
+const helpers = require('./Helpers');
 
 module.exports.possiblyInit = async function(data) {
     console.log('Initializing daily standup');

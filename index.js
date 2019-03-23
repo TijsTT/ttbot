@@ -1,24 +1,15 @@
 require('dotenv').config();
+require('./cronTasks');
+
 const express = require('express');
-const request = require('request');
 const mongoose = require('mongoose');
-const cron = require('node-cron');
 const axios = require('axios');
+const bugsnagClient = require('./bugsnagClient');
 
-var app = express();
-
-var bugsnag = require('@bugsnag/js');
-const bugsnagClient = bugsnag('c69a52cb2a5e0676d817d567ff3d34ed');
-
-const helpers = require('./helpers');
-const slackHandlers = require('./slackHandlers');
-const dailyStandupHandler = require('./dailyStandupHandler');
-const settingsUsersHandler = require('./settingsUserHandler');
-
-// Bodyparser middleware
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const Helpers = require('./classes/Helpers');
+const SlackHandlers = require('./classes/SlackHandlers');
+const SettingsUsersHandler = require('./classes/SettingsUserHandler');
+const EmployeeOfTheMonthHandlers = require('./classes/EmployeeOfTheMonthHandlers'); 
 
 // Database connection
 mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { 
@@ -26,14 +17,21 @@ mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD
 }).then(result => console.log("Connected to the database."))
 .catch(err => bugsnagClient.notify(new Error(err)));
 
-const employeeOfTheMonthHandlers = require('./employeeOfTheMonthHandlers'); 
+// Starting app
+var app = express();
+
+// Bodyparser middleware
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/", async function(req, res) {
 
     let data = req.body;
-    let userID = helpers.getUserId(data);
 
-    handleSlackAuthorization(data, res);
+    if(handleSlackAuthorization(data, res)) return;
+
+    let userID = Helpers.getUserId(data);
 
     if(data.event.subtype && data.event.subtype === 'bot_message') return;
     if(userID === undefined) return;
@@ -49,11 +47,11 @@ app.post("/", async function(req, res) {
     // if the message is a standard message
     } else if(data.event.type === "message") {
 
-        let text = helpers.getTextMessage(data);
+        let text = Helpers.getTextMessage(data);
 
         // if a point was given
-        if(await helpers.emoticonUsed(text, userID) && helpers.userMentioned(text)) {
-            return employeeOfTheMonthHandlers.init(data);
+        if(await Helpers.emoticonUsed(text, userID) && Helpers.userMentioned(text)) {
+            return EmployeeOfTheMonthHandlers.init(data);
         }
 
     }
@@ -63,7 +61,7 @@ app.post("/", async function(req, res) {
 // Handles all possible commands
 async function handleCommands(data) {
 
-    let message = helpers.getTextMessage(data);
+    let message = Helpers.getTextMessage(data);
     let args = message.split(" ");
 
     if(!args[1]) return;
@@ -71,25 +69,26 @@ async function handleCommands(data) {
     switch(args[1].toLowerCase()) {
 
         case "help":
-            postCommands(data.event.channel, helpers.getUserId(data));
+            postCommands(data.event.channel, Helpers.getUserId(data));
             break;
 
         case "score":
             let date = new Date();
             let currentMonth = `${date.getMonth()}/${date.getFullYear()}`;
-            employeeOfTheMonthHandlers.getScoreBoard(data.event.channel, currentMonth);
+            EmployeeOfTheMonthHandlers.getScoreBoard(data.event.channel, currentMonth);
             break;
 
         case "emoticon":
-            if(args[2]) settingsUsersHandler.changeSettingsUserEmoticon(helpers.getUserId(data), args[2]);
+            if(args[2]) SettingsUsersHandler.changeSettingsUserEmoticon(Helpers.getUserId(data), args[2]);
             else {
-                let userID = helpers.getUserId(data);
-                let userEmoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
-                slackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, data.event.channel, userID);
+                let userID = Helpers.getUserId(data);
+                let userEmoticon = await SettingsUsersHandler.getSettingsUserEmoticon(userID);
+                SlackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, data.event.channel, userID);
             }
             break;
+
         case "emojilist":
-            settingsUsersHandler.postAllSettingsUserEmoticons();
+            SettingsUsersHandler.postAllSettingsUserEmoticons();
             break;
 
         case "tell":
@@ -97,12 +96,7 @@ async function handleCommands(data) {
             break;
         
         // case "nooneisevergonnausethiscommandinit":
-        //     slackHandlers.getSlackUsersList();
-        //     break;
-
-        // case "dailystandupuser":
-        //     let dailyStandupUserID = await helpers.getMentionedUsersId(helpers.getTextMessage(data))[0];
-        //     dailyStandupHandler.addDailyStandupUser(dailyStandupUserID);
+        //     SlackHandlers.getSlackUsersList();
         //     break;
 
         default:
@@ -116,9 +110,10 @@ function handleSlackAuthorization(data, res) {
     if(data.challenge) {
         res.type('text/plain'); 
         res.send(data.challenge);
-        return;
+        return true;
     } else {
         res.sendStatus(200);
+        return false;
     }
 }
 
@@ -127,11 +122,11 @@ function postRandomJoke(channel) {
     axios.get('https://icanhazdadjoke.com/slack')
     .then((response) => {
         let joke = response.data.attachments[0].text;
-        return slackHandlers.chatPostMessage(joke, channel);
+        return SlackHandlers.chatPostMessage(joke, channel);
     })
     .catch((err) => {
         bugsnagClient.notify(new Error(err));
-        return slackHandlers.chatPostMessage("The joke is a lie.", channel);
+        return SlackHandlers.chatPostMessage("The joke is a lie.", channel);
     });
 
 }
@@ -151,30 +146,13 @@ async function postCommands(channel, userID) {
         output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    let emoticon = await settingsUsersHandler.getSettingsUserEmoticon(userID);
+    let emoticon = await SettingsUsersHandler.getSettingsUserEmoticon(userID);
 
     output += `\nTo thank employees for being awesome, you can award them by giving them a ${emoticon}\nJust mention the person (@person) and add as many ${emoticon} emojis to the message as you want to give them that many points!`
 
-    return slackHandlers.chatPostEphemeralMessage(output, channel, userID);
+    return SlackHandlers.chatPostEphemeralMessage(output, channel, userID);
 
 }
-
-// Interval loop to prevent server from going into sleep mode
-cron.schedule('*/5 * * * *', () => {
-    console.log('Pinging server so it doesn\'t go to sleep...');
-    request({ uri: 'https://ttbot-slack.herokuapp.com/', method: 'GET' }, (err) => {
-        if(err) bugsnagClient.notify(new Error(err));;
-    })
-});
-
-cron.schedule('0 9 * * 1', () => {
-    let date = new Date();
-    if(date.getDate() < 8) employeeOfTheMonthHandlers.announceWinners();
-});
-
-cron.schedule('0 0 * * *', () => {
-    dailyStandupHandler.possiblyInit();
-})
 
 // Make sure that the ping request doesn't return a 404 status
 app.get('/', function(req, res) {
