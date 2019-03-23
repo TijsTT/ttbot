@@ -1,5 +1,6 @@
 const axios = require('axios');
 const bugsnagClient = require('../bugsnagClient');
+console.log(bugsnagClient);
 
 const SettingsUserHandler = require('./SettingsUserHandler');
 
