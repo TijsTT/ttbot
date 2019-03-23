@@ -5,35 +5,38 @@ const EmployeeOfTheMonth = require('../models/employeeOfTheMonth.js');
 
 const Helpers = require('./Helpers');
 const SlackHandlers = require('./SlackHandlers');
+const SettingsUserHandler = require('./SettingsUserHandler');
 
 module.exports = class EmployeeOfTheMonthHandlers {
 
     // Initializes the process of adding points to an employee
     static async init(data) {
 
-        let mentionedUsersId = Helpers.getMentionedUsersId(Helpers.getTextMessage(data));
+        let mentionedUsersId = Helpers.getMentionedUsersId(Helpers.getTextMessage(data)),
+            userID = Helpers.getUserId(data);
 
         for(let i = 0; i < mentionedUsersId.length; i++) {
 
+            // Exlclude the bot itself
             if(mentionedUsersId[i] === process.env.BOT_ID) continue;
 
-            if(mentionedUsersId[i] === Helpers.getUserId(data)) {
+            if(mentionedUsersId[i] === userID) {
                 
-                let usernameGiver = await SlackHandlers.getSlackUsernameById(Helpers.getUserId(data));
+                let usernameGiver = await SlackHandlers.getSlackUsernameById(userID);
                 SlackHandlers.chatPostMessage(`You can't give points to yourself ${usernameGiver}. Nice try.`, process.env.BOT_CHANNEL);
             
             } else {
                 
-                let amountOfPoints = await Helpers.getAmountOfPoints(Helpers.getTextMessage(data), Helpers.getUserId(data));
-                let date = new Date();
-                let dateString = `${date.getMonth()}/${date.getFullYear()}`;
+                let userEmoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID),
+                    amountOfPoints = await Helpers.getAmountOfPoints(Helpers.getTextMessage(data), userEmoticon),
+                    date = new Date(),
+                    dateString = `${date.getMonth()}/${date.getFullYear()}`;
 
                 EmployeeOfTheMonth.findOne({ month: dateString })
                 .then(async result => {
 
-                    let month = result === null ? await this.initNewMonth(dateString) : result;
-                    
-                    let output = await this.addPointsToUser(month, mentionedUsersId[i], amountOfPoints, data);
+                    let month = result === null ? await this.initNewMonth(dateString) : result,
+                        output = await this.addPointsToUser(month, mentionedUsersId[i], amountOfPoints, data);
 
                     SlackHandlers.chatPostMessage(output, process.env.BOT_CHANNEL);
 
@@ -55,9 +58,9 @@ module.exports = class EmployeeOfTheMonthHandlers {
 
             if(result === null) return SlackHandlers.chatPostMessage("This month there are no points given yet.", channel);
 
-            let output = "";
-            let usersList = await SlackHandlers.getSlackUsersList();
-            let icons = [":first_place_medal:", ":second_place_medal:", ":third_place_medal:", ":sports_medal:"];
+            let output = "",
+                usersList = await SlackHandlers.getSlackUsersList(),
+                icons = [":first_place_medal:", ":second_place_medal:", ":third_place_medal:", ":sports_medal:"];
 
             // Sorting employees by score
             result.employees.sort(function(a, b) { return b.points - a.points });
@@ -92,7 +95,7 @@ module.exports = class EmployeeOfTheMonthHandlers {
 
         }).catch(err => {
             bugsnagClient.notify(new Error(err));
-            return SlackHandlers.chatPostMessage("Something went wrong searching the database", data.event.channel);
+            return SlackHandlers.chatPostMessage("Something went wrong searching the database", channel);
         })
 
     }

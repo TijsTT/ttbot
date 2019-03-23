@@ -4,17 +4,12 @@ require('./cronTasks');
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
+
 const bugsnagClient = require('./bugsnagClient');
 
-const Helpers = require('./classes/Helpers');
-const SlackHandlers = require('./classes/SlackHandlers');
-const SettingsUsersHandler = require('./classes/SettingsUserHandler');
-const EmployeeOfTheMonthHandlers = require('./classes/EmployeeOfTheMonthHandlers'); 
-
 // Database connection
-mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { 
-	useNewUrlParser: true,
-}).then(result => console.log("Connected to the database."))
+mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { useNewUrlParser: true,})
+.then(result => console.log("Connected to the database."))
 .catch(err => bugsnagClient.notify(new Error(err)));
 
 // Starting app
@@ -24,6 +19,11 @@ var app = express();
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const Helpers = require('./classes/Helpers');
+const SlackHandlers = require('./classes/SlackHandlers');
+const SettingsUserHandler = require('./classes/SettingsUserHandler');
+const EmployeeOfTheMonthHandlers = require('./classes/EmployeeOfTheMonthHandlers'); 
 
 app.post("/", async function(req, res) {
 
@@ -47,10 +47,11 @@ app.post("/", async function(req, res) {
     // if the message is a standard message
     } else if(data.event.type === "message") {
 
-        let text = Helpers.getTextMessage(data);
+        let text = Helpers.getTextMessage(data),
+            userEmoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID);
 
         // if a point was given
-        if(await Helpers.emoticonUsed(text, userID) && Helpers.userMentioned(text)) {
+        if(await Helpers.emoticonUsed(text, userEmoticon) && Helpers.userMentioned(text)) {
             return EmployeeOfTheMonthHandlers.init(data);
         }
 
@@ -79,16 +80,16 @@ async function handleCommands(data) {
             break;
 
         case "emoticon":
-            if(args[2]) SettingsUsersHandler.changeSettingsUserEmoticon(Helpers.getUserId(data), args[2]);
+            if(args[2]) SettingsUserHandler.changeSettingsUserEmoticon(Helpers.getUserId(data), args[2]);
             else {
                 let userID = Helpers.getUserId(data);
-                let userEmoticon = await SettingsUsersHandler.getSettingsUserEmoticon(userID);
+                let userEmoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID);
                 SlackHandlers.chatPostEphemeralMessage(`Your emoticon is ${userEmoticon}`, data.event.channel, userID);
             }
             break;
 
         case "emojilist":
-            SettingsUsersHandler.postAllSettingsUserEmoticons();
+            SettingsUserHandler.postAllSettingsUserEmoticons();
             break;
 
         case "tell":
@@ -146,7 +147,7 @@ async function postCommands(channel, userID) {
         output += `- @TTBOT ${commands[i].command} - ${commands[i].description}\n`
     }
 
-    let emoticon = await SettingsUsersHandler.getSettingsUserEmoticon(userID);
+    let emoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID);
 
     output += `\nTo thank employees for being awesome, you can award them by giving them a ${emoticon}\nJust mention the person (@person) and add as many ${emoticon} emojis to the message as you want to give them that many points!`
 

@@ -5,4 +5,4 @@ var bugsnagClient = bugsnag({
 });
 bugsnagClient.app.releaseStage = process.env.APP_ENV;
 
-module.exports.bugsnagClient = bugsnagClient;
+module.exports = bugsnagClient;

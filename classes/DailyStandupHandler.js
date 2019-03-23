@@ -1,5 +1,3 @@
-// Here every function that's connected to the DailyStandupUser collection is located.
-
 const mongoose = require('mongoose');
 const dailyStandupUser = require('../models/dailyStandupUser.js');
 

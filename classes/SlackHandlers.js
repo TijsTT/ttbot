@@ -1,8 +1,7 @@
 const axios = require('axios');
 const bugsnagClient = require('../bugsnagClient');
-console.log(bugsnagClient);
 
-const SettingsUserHandler = require('./SettingsUserHandler');
+const Helpers = require('./Helpers');
 
 module.exports = class SlackHandlers {
 
@@ -63,7 +62,7 @@ module.exports = class SlackHandlers {
                     usersList = [];
 
                 // UPDATES THE USERS IN THE DATABASE
-                SettingsUserHandler.init(data);
+                // SettingsUserHandler.init(data);
 
                 for(let i = 0; i < data.members.length; i++) {
 

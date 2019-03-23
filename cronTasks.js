@@ -1,6 +1,6 @@
-const bugsnagClient = require('./bugsnagClient');
 const cron = require('node-cron');
 const axios = require('axios');
+const bugsnagClient = require('./bugsnagClient');
 
 // Interval loop to prevent server from going into sleep mode
 cron.schedule('*/5 * * * *', () => {

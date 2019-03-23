@@ -1,5 +1,3 @@
-const SettingsUserHandler = require('./SettingsUserHandler');
-
 module.exports = class Helpers {
 
     // Checks if the given user is a bot
@@ -16,23 +14,19 @@ module.exports = class Helpers {
     }
 
     // Returns if the given text contains the set emoticon
-    static async emoticonUsed(text, userID) {
+    static async emoticonUsed(text, emoticon) {
 
-        let userEmoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID);
+        if(!emoticon) return false;
 
-        if(!userEmoticon) return false;
-
-        if(text.includes(userEmoticon)) return true;
+        if(text.includes(emoticon)) return true;
         return false;
 
     }
 
     // Returns the amount of set emoticons in the given text
-    static async getAmountOfPoints(text, userID) {
+    static async getAmountOfPoints(text, emoticon) {
 
-        let userEmoticon = await SettingsUserHandler.getSettingsUserEmoticon(userID);
-
-        let regex = new RegExp(module.exports.escapeRegExp(userEmoticon), "g");
+        let regex = new RegExp(module.exports.escapeRegExp(emoticon), "g");
         let count = (text.match(regex) || []).length;
 
         return count
