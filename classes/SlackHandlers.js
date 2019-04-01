@@ -94,6 +94,7 @@ module.exports = class SlackHandlers {
             .then(result => {
     
                 let data = result.data;
+                console.log(data.members, data);
     
                 if(data.ok) {
     
