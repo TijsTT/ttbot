@@ -41,7 +41,6 @@ module.exports = class Helpers {
 
         for(let i = 0; i < mentionedUsers.length; i++) {
             mentionedUsers[i] = mentionedUsers[i].slice(2, mentionedUsers[i].length - 1);
-            console.log(mentionedUsers[i]);
         }
 
         return mentionedUsers;

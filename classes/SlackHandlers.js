@@ -94,14 +94,15 @@ module.exports = class SlackHandlers {
             .then(result => {
     
                 let data = result.data;
-                console.log(data.members, data);
     
                 if(data.ok) {
     
                     for(let i = 0; i < data.members.length; i++) {
     
                         if(data.members[i].id == userID) {
-                            return resolve(data.members[i].name);
+                            if(data.members[i].name) return resolve(data.members[i].name);
+                            console.log(`data.members[i].name undefined? ${data.members[i].name}`);
+                            return resolve('someone');
                         }
                             
                     }
