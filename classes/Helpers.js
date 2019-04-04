@@ -29,6 +29,9 @@ module.exports = class Helpers {
         let regex = new RegExp(module.exports.escapeRegExp(emoticon), "g");
         let count = (text.match(regex) || []).length;
 
+        // Only allow 5 points at a time
+        if(count > 5) { count = 5 };
+
         return count
 
     }
