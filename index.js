@@ -8,7 +8,7 @@ const axios = require('axios');
 const bugsnagClient = require('./bugsnagClient');
 
 // Database connection
-mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true, useMongoClient: true})
 .then(result => console.log("Connected to the database."))
 .catch(err => bugsnagClient.notify(new Error(err)));
 
@@ -158,6 +158,11 @@ async function postCommands(channel, userID) {
 // Make sure that the ping request doesn't return a 404 status
 app.get('/', function(req, res) {
     res.sendStatus(200);
+})
+app.get('/api/scoreboard/:month/:year', async function(req, res) {
+    const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
+    let result = await EmployeeOfTheMonth.getJson(`${req.params.month}/${req.params.year}`);
+    res.send(result);
 })
 
 var server = app.listen(process.env.PORT, function() {

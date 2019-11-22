@@ -12,4 +12,8 @@ const employeeOfTheMonthSchema = mongoose.Schema({
     ],
 })
 
+employeeOfTheMonthSchema.statics.getJson = function(month){
+    return mongoose.model("EmployeeOfTheMonth").find({month: month}).lean();
+}
+
 module.exports = mongoose.model("EmployeeOfTheMonth", employeeOfTheMonthSchema);
