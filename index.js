@@ -8,7 +8,7 @@ const axios = require('axios');
 const bugsnagClient = require('./bugsnagClient');
 
 // Database connection
-mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true, useMongoClient: true})
+mongoose.connect(`mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`, { useNewUrlParser: true})
 .then(result => console.log("Connected to the database."))
 .catch(err => bugsnagClient.notify(new Error(err)));
 
