@@ -96,9 +96,9 @@ async function handleCommands(data) {
             if(args[2].toLowerCase() === "me" && args[3].toLowerCase() === "a" && args[4].toLowerCase() === "joke") postRandomJoke(data.event.channel);
             break;
         
-        // case "nooneisevergonnausethiscommandinit":
-        //     SlackHandlers.getSlackUsersList();
-        //     break;
+        case "nooneisevergonnausethiscommandinit":
+            SlackHandlers.getSlackUsersList();
+            break;
 
         default:
             break;
