@@ -2,6 +2,7 @@ const axios = require('axios');
 const bugsnagClient = require('../bugsnagClient');
 
 const Helpers = require('./Helpers');
+const SettingsUserHandler = require('./SettingsUserHandler');
 
 module.exports = class SlackHandlers {
 
