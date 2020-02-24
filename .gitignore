@@ -1,3 +1,4 @@
 .env
+.env.production
 testing.env
 node_modules/
