@@ -159,11 +159,6 @@ async function postCommands(channel, userID) {
 app.get('/', function(req, res) {
     res.sendStatus(200);
 })
-app.get('/api/scoreboard/:month/:year', async function(req, res) {
-    const EmployeeOfTheMonth = require('./models/employeeOfTheMonth.js');
-    let result = await EmployeeOfTheMonth.getJson(`${req.params.month}/${req.params.year}`);
-    res.send(result);
-})
 
 var server = app.listen(process.env.PORT, function() {
     var port = server.address().port;
