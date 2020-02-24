@@ -62,7 +62,7 @@ module.exports = class SlackHandlers {
                     usersList = [];
 
                 // UPDATES THE USERS IN THE DATABASE
-                // SettingsUserHandler.init(data);
+                SettingsUserHandler.init(data);
 
                 for(let i = 0; i < data.members.length; i++) {
 
